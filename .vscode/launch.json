@@ -85,6 +85,13 @@
       "cwd": "${workspaceFolder}/backend"
     },
     {
+      "name": "Build & ZIP: JackTools Backend",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "npm exec --yes --package=node@24.17.0 --package=npm@11 -- npm run deploy:zip",
+      "cwd": "${workspaceFolder}/backend"
+    },
+    {
       "name": "Check: JackTools Backend",
       "type": "node-terminal",
       "request": "launch",

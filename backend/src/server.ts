@@ -1,14 +1,14 @@
 import {createCertificateMonitor,type CertificateMonitor} from './certificate-monitor.js';
 import {loadEnvironment,loadConfig} from './config.js';
 import {Database,databaseErrorHint} from './database.js';
-import {requireSchema} from './migrate.js';
-import {bootstrapRoot} from './bootstrap.js';
+import {initializeDatabase} from './initialize-database.js';
 import {createApp} from './app.js';
 loadEnvironment();
 let db:Database|undefined,certificates:CertificateMonitor|undefined;
 try{
  const config=loadConfig(process.env);db=new Database(config);
- await requireSchema(db);await bootstrapRoot(db,config);
+ await initializeDatabase(db,config);
+ console.log(JSON.stringify({event:'database_initialized'}));
  certificates=createCertificateMonitor(config.certificates,db);
  const app=await createApp(config,db,certificates);
  const server=app.listen(config.port,config.host,()=>console.log(JSON.stringify({event:'listening',host:config.host,port:config.port})));

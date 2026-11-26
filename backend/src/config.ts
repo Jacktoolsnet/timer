@@ -12,27 +12,30 @@ function number(value:string|undefined,fallback:number,name:string,min=1,max=100
  return parsed;
 }
 export function createDbConfigFromEnv(env:Env):PoolConfig{
- const connectionString=env.ADMIN_DATABASE_URL||env.DATABASE_URL;
- const ssl=String(env.ADMIN_DB_SSL||env.DB_SSL||'').toLowerCase()==='true';
- const raw=Number(env.ADMIN_DB_POOL_MAX||env.DB_POOL_MAX||10);
+ const legacy=Object.keys(env).find(key=>/^(ADMIN_DATABASE_URL|ADMIN_DB_[A-Z_]+)$/.test(key)&&env[key]);
+ if(legacy)throw new Error('Invalid database variable '+legacy+': use '+legacy.replace(/^ADMIN_/,''));
+
+ const connectionString=env.DATABASE_URL;
+ const ssl=String(env.DB_SSL||'').toLowerCase()==='true';
+ const raw=Number(env.DB_POOL_MAX||10);
  const max=Number.isInteger(raw)&&raw>0?raw:10;
  const common={max,connectionTimeoutMillis:5000,idleTimeoutMillis:30000,statement_timeout:15000,
   ssl:ssl?{rejectUnauthorized:true}:undefined};
  if(connectionString){
   let url:URL;try{url=new URL(connectionString);}catch{throw new Error('Invalid DATABASE_URL');}
   if(!['postgres:','postgresql:'].includes(url.protocol))throw new Error('Invalid DATABASE_URL');
-  if([...url.searchParams.keys()].some(key=>key.toLowerCase().startsWith('ssl')))throw new Error('Invalid DATABASE_URL SSL options: use ADMIN_DB_SSL or DB_SSL and NODE_EXTRA_CA_CERTS');
+  if([...url.searchParams.keys()].some(key=>key.toLowerCase().startsWith('ssl')))throw new Error('Invalid DATABASE_URL SSL options: use DB_SSL and NODE_EXTRA_CA_CERTS');
   return {connectionString,...common};
  }
- return {...common,host:env.ADMIN_DB_HOST||env.DB_HOST||'localhost',
-  port:number(env.ADMIN_DB_PORT||env.DB_PORT,5432,'DB_PORT',1,65535),
-  database:env.ADMIN_DB_NAME||env.DB_NAME||'jacktools',user:env.ADMIN_DB_USER||env.DB_USER||'jacktools',
-  password:env.ADMIN_DB_PASSWORD||env.DB_PASSWORD||undefined};
+ return {...common,host:env.DB_HOST||'localhost',
+  port:number(env.DB_PORT,5432,'DB_PORT',1,65535),
+  database:env.DB_NAME||'jacktools',user:env.DB_USER||'jacktools',
+  password:env.DB_PASSWORD||undefined};
 }
 export function databaseLimits(env:Env){
- const raw=Number.parseInt(env.ADMIN_DB_MAX_PENDING_REQUESTS||env.DB_MAX_PENDING_REQUESTS||'',10);
+ const raw=Number.parseInt(env.DB_MAX_PENDING_REQUESTS||'',10);
  return {maxPending:Number.isFinite(raw)&&raw>0?raw:1000,
-  retryAfter:number(env.ADMIN_DB_OVERLOAD_RETRY_AFTER_SECONDS||env.DB_OVERLOAD_RETRY_AFTER_SECONDS,2,'DB_OVERLOAD_RETRY_AFTER_SECONDS',1,3600)};
+  retryAfter:number(env.DB_OVERLOAD_RETRY_AFTER_SECONDS,2,'DB_OVERLOAD_RETRY_AFTER_SECONDS',1,3600)};
 }
 export function loadConfig(env:Env){
  const production=env.NODE_ENV==='production';

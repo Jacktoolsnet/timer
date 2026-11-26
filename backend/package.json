@@ -26,7 +26,8 @@
     "dev:local": "tsx src/local-dev.ts dev:local",
     "root:reset:local": "tsx src/local-dev.ts root:reset:local",
     "certificates:check": "tsx src/cli.ts certificates:check",
-    "certificates:check:production": "node --enable-source-maps dist/cli.js certificates:check"
+    "certificates:check:production": "node --enable-source-maps dist/cli.js certificates:check",
+    "deploy:zip": "npm run check && node scripts/package-deploy.mjs"
   },
   "dependencies": {
     "dotenv": "^17.2.3",

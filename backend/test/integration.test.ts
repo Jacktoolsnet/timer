@@ -7,13 +7,13 @@ import assert from 'node:assert/strict';
 import type {Server} from 'node:http';
 import {loadConfig} from '../src/config.js';
 import {Database,BusyError} from '../src/database.js';
-import {migrate} from '../src/migrate.js';
+import {initializeDatabase} from '../src/initialize-database.js';
 import {bootstrapRoot} from '../src/bootstrap.js';
 import {createApp} from '../src/app.js';
 const url=process.env.TEST_DATABASE_URL;
 if(!url||!new URL(url).pathname.endsWith('_test'))throw new Error('TEST_DATABASE_URL must point to a dedicated empty *_test database. Use npm run test:local for an isolated database.');
 const origin='http://127.0.0.1:4321';
-const config=loadConfig({ADMIN_DATABASE_URL:url,ROOT_USERNAME:'root',ROOT_PASSWORD:'test-only-root-password!',SESSION_SECRET:'test-only-integration-session-secret-12345',ADMIN_ALLOWED_ORIGINS:origin,LOGIN_LIMIT:'100'});
+const config=loadConfig({DATABASE_URL:url,ROOT_USERNAME:'root',ROOT_PASSWORD:'test-only-root-password!',SESSION_SECRET:'test-only-integration-session-secret-12345',ADMIN_ALLOWED_ORIGINS:origin,LOGIN_LIMIT:'100'});
 const db=new Database(config);let server:Server,base:string;
 let certificateStatus:CertificateStatus='warning',mailFails=false,probeGate:Promise<void>|undefined;
 const mailMessages:CertificateMail[]=[];
@@ -34,12 +34,28 @@ before(async()=>{
  // Never erase an existing database. The runner creates a new private cluster.
  const existing=await db.query("SELECT to_regclass('public.jt_users') AS name");
  if(existing.rows[0].name)throw new Error('Refusing to run integration tests against existing JackTools tables');
- await Promise.all([migrate(db),migrate(db)]);
- const created=await Promise.all([bootstrapRoot(db,config),bootstrapRoot(db,config)]);assert.equal(created.filter(Boolean).length,1);
+ const created=await Promise.all([initializeDatabase(db,config),initializeDatabase(db,config)]);assert.equal(created.filter(Boolean).length,1);
  const app=await createApp(config,db,certificates);server=app.listen(0,'127.0.0.1');await new Promise<void>(resolve=>server.once('listening',resolve));
  const address=server.address();if(!address||typeof address==='string')throw new Error('Missing test listener');base=`http://127.0.0.1:${address.port}`;
 });
 after(async()=>{await certificates.close();if(server)await new Promise<void>(resolve=>server.close(()=>resolve()));await db.close();});
+test('startup installs schema and indexes, preserves data on restart and rejects modified migrations',async()=>{
+ for(const table of ['jt_users','jt_tv_sessions','jt_certificate_results']){
+  const row=await db.query('SELECT to_regclass($1) AS name',['public.'+table]);assert.ok(row.rows[0].name);
+ }
+ const indexes=await db.query("SELECT indexname FROM pg_indexes WHERE schemaname='public' AND tablename LIKE 'jt_%'");assert.ok(indexes.rows.length>3);
+ const users=await db.query('SELECT id,password_hash FROM jt_users ORDER BY id');
+ const migrations=await db.query('SELECT name,checksum,applied_at FROM jt_schema_migrations ORDER BY name');assert.ok(migrations.rows.length>=3);
+ assert.deepEqual(await Promise.all([initializeDatabase(db,config),initializeDatabase(db,config)]),[false,false]);
+ assert.deepEqual((await db.query('SELECT id,password_hash FROM jt_users ORDER BY id')).rows,users.rows);
+ assert.deepEqual((await db.query('SELECT name,checksum,applied_at FROM jt_schema_migrations ORDER BY name')).rows,migrations.rows);
+ const first=migrations.rows[0];
+ try{
+  await db.query('UPDATE jt_schema_migrations SET checksum=$1 WHERE name=$2',['invalid-test-checksum',first.name]);
+  await assert.rejects(initializeDatabase(db,config),/Invalid migration checksum/);
+  assert.deepEqual((await db.query('SELECT id,password_hash FROM jt_users ORDER BY id')).rows,users.rows);
+ }finally{await db.query('UPDATE jt_schema_migrations SET checksum=$1 WHERE name=$2',[first.checksum,first.name]);}
+});
 test('root authentication, origins, CSRF, sessions and reset',async()=>{
  assert.equal((await fetch(base+'/health/live')).status,200);assert.equal((await fetch(base+'/health/ready')).status,200);
  assert.equal((await request('admin/users')).status,401);
@@ -112,7 +128,7 @@ test('CORS preflight, payload validation and production session flags',async()=>
  const response=await fetch(base+'/api/v1/auth/login',{method:'POST',headers:{Origin:origin,'Content-Type':'application/json'},body:'invalid json'});assert.equal(response.status,400);
  // Exercise the real production configuration and exact Company origin. HTTP is
  // only the private test transport; the deployment terminates TLS at its proxy.
- const productionConfig=loadConfig({NODE_ENV:'production',ADMIN_DATABASE_URL:url,
+ const productionConfig=loadConfig({NODE_ENV:'production',DATABASE_URL:url,
   ROOT_USERNAME:config.rootUsername,ROOT_PASSWORD:config.rootPassword,SESSION_SECRET:config.secret,LOGIN_LIMIT:'100'});
  const productionOrigin='https://jacktools.net';
  assert.equal(productionConfig.baseUrl,'https://backend.jacktools.net');

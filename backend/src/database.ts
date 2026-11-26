@@ -27,9 +27,9 @@ export class Database{
 export function databaseErrorHint(error:unknown):string|undefined{
  const code=error&&typeof error==='object'&&'code' in error?String(error.code):'';
  const hints:Record<string,string>={
-  '28P01':'Database authentication failed (28P01). Check target/user/password. For local Docker: npm run db:start, then npm run migrate:local.',
+  '28P01':'Database authentication failed (28P01). Check target/user/password. For local Docker: npm run db:start, then restart the backend.',
   '3D000':'Configured database does not exist (3D000). Create it first, or start the local Docker database.',
-  '42501':'Database permission denied (42501). The migration user needs schema creation rights.',
+  '42501':'Database permission denied (42501). The configured database user needs schema creation and alteration rights for automatic startup migrations.',
   'ECONNREFUSED':'Database connection refused. Start the database and check its host/port. For local Docker use npm run db:start.',
   'ETIMEDOUT':'Database connection timed out. Check host/port and network access.',
  };

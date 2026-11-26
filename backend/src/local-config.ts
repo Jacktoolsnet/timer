@@ -16,7 +16,7 @@ export function localDatabaseEnvironment(source:Env):Record<string,string>{
  return {
   JT_LOCAL_DB_USER:user,JT_LOCAL_DB_PASSWORD:password,JT_LOCAL_DB_NAME:name,JT_LOCAL_DB_PORT:port,
   // Explicit overrides in the child process win over dotenv and URL precedence.
-  ADMIN_DATABASE_URL:'',DATABASE_URL:'',ADMIN_DB_HOST:'127.0.0.1',ADMIN_DB_PORT:port,
-  ADMIN_DB_USER:user,ADMIN_DB_PASSWORD:password,ADMIN_DB_NAME:name,ADMIN_DB_SSL:'false',
+  DATABASE_URL:'',DB_HOST:'127.0.0.1',DB_PORT:port,
+  DB_USER:user,DB_PASSWORD:password,DB_NAME:name,DB_SSL:'false',
  };
 }

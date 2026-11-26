@@ -22,7 +22,7 @@ try{
  const compose=['compose','--env-file',fileURLToPath(new URL('../compose.env',import.meta.url)),'--project-name','jacktools-backend-local','--file',fileURLToPath(new URL('../compose.yaml',import.meta.url))];
  const docker=(...args:string[])=>run('docker',[...compose,...args],env);
  const npm=(...args:string[])=>run(process.platform==='win32'?'npm.cmd':'npm',args,env);
- console.log(`Local PostgreSQL target: 127.0.0.1:${local.ADMIN_DB_PORT}. backend/.env is unchanged.`);
+ console.log(`Local PostgreSQL target: 127.0.0.1:${local.DB_PORT}. backend/.env is unchanged.`);
  if(action==='db:start')await docker('up','-d','--wait');
  if(action==='db:stop')await docker('stop');
  if(action==='db:status')await docker('ps');
@@ -33,7 +33,7 @@ try{
   await npm('run','root:reset','--','--confirm');
  }
  if(action==='dev:local'){
-  await docker('up','-d','--wait');await npm('run','migrate');await npm('run','dev');
+  await docker('up','-d','--wait');await npm('run','dev');
  }
 }catch(error){console.error(error instanceof Error?error.message:'Local command failed');process.exitCode=interrupted?130:1;}
 finally{process.removeListener('SIGINT',interrupt);process.removeListener('SIGTERM',interrupt);}

@@ -2,7 +2,7 @@
 
 Eigenständige Express-5-/TypeScript-API für Company und Tools. Keine Verbindung zu
 MessageDrop, dessen Adminbackend oder Datenbank. Zieladresse: `https://backend.jacktools.net`.
-Browserbasierte TV-Kopplung ist als erster Stand implementiert. Zertifikatsüberwachung ist noch geplant.
+Browserbasierte Kopplung der Uhr und Zertifikatsüberwachung sind implementiert.
 
 ## Voraussetzungen und erster Start
 
@@ -21,8 +21,8 @@ cp .env.example .env   # nur wenn .env noch nicht existiert!
 npm run dev:local
 ```
 
-`dev:local` startet die lokale Docker-Datenbank, wartet auf Bereitschaft, führt die
-Migrationen aus und startet dann das Backend mit Watch-Modus. Die Datenbank läuft
+`dev:local` startet die lokale Docker-Datenbank, wartet auf Bereitschaft und startet das Backend mit Watch-Modus.
+Das Backend installiert beim Start automatisch ausstehende Migrationen. Die Datenbank läuft
 nur auf **127.0.0.1:55433** und erhält ein eigenes Volume
 `jacktools-backend-local_jacktools_pg`. Sie teilt keine Daten mit NullTopic,
 MessageDrop oder einem PostgreSQL-Dienst auf dem Systemport 5432.
@@ -52,8 +52,8 @@ Zurücksetzen des Volumes gibt es nicht.
 **Wichtig für eine bereits kopierte `.env` mit Port 5432:** `npm run migrate` nutzt
 weiterhin genau diese konfigurierte Adresse. Verwende für die neue lokale Datenbank
 `npm run migrate:local` bzw. `npm run dev:local`. Falls du bewusst auch die normalen
-Befehle lokal verwenden möchtest, setze selbst `ADMIN_DB_HOST=127.0.0.1` und
-`ADMIN_DB_PORT=55433` und entferne gegebenenfalls vorrangige Datenbank-URLs.
+Befehle lokal verwenden möchtest, setze selbst `DB_HOST=127.0.0.1` und
+`DB_PORT=55433` und entferne gegebenenfalls vorrangige Datenbank-URLs.
 
 **Passwortänderungen nach der Erstinitialisierung:** PostgreSQL übernimmt
 `POSTGRES_USER`, `POSTGRES_PASSWORD` und `POSTGRES_DB` nur beim Anlegen eines neuen
@@ -68,8 +68,7 @@ Die gewünschte Datenbank und den Benutzer zuerst auf dem PostgreSQL-Server anle
 Berechtigungen vergeben und deren Werte in der Backend-Umgebung setzen. Erst dann:
 
 ```bash
-npm run migrate
-npm run dev  # produktiv nach Build: npm start
+npm run dev  # produktiv nach Build: npm start; Datenbankaufbau erfolgt automatisch
 ```
 
 Migrationen legen Tabellen an, aber **keinen PostgreSQL-Server und keinen
@@ -101,28 +100,31 @@ Bereits vom Server gesetzte Umgebungsvariablen haben Vorrang vor der Datei.
 `.env` und Buildausgaben sind nicht versioniert; echte Passwörter gehören auch
 nicht in VS-Code-Launch-Konfigurationen.
 
-## Datenbankvariablen wie im MessageDrop Adminbackend
+## Datenbankvariablen
 
-Gleiches **Namens- und Vorrangschema**, aber vollständig eigene Werte:
+Die unabhängige JackTools-Datenbank verwendet ausschließlich **DB_*** und
+**DATABASE_URL**. Frühere ADMIN_DB_*- und ADMIN_DATABASE_URL-Variablen müssen
+beim Hoster umbenannt werden; gesetzte alte Variablen führen zu einem verständlichen
+Konfigurationsfehler statt einer unbemerkten Verbindung zur falschen Datenbank.
 
-| Vorrang | Allgemeiner Fallback | Standard im JackTools Backend |
-| --- | --- | --- |
-| `ADMIN_DATABASE_URL` | `DATABASE_URL` | nicht gesetzt |
-| `ADMIN_DB_HOST` | `DB_HOST` | `localhost` |
-| `ADMIN_DB_PORT` | `DB_PORT` | `5432` |
-| `ADMIN_DB_NAME` | `DB_NAME` | `jacktools` |
-| `ADMIN_DB_USER` | `DB_USER` | `jacktools` |
-| `ADMIN_DB_PASSWORD` | `DB_PASSWORD` | nicht gesetzt |
-| `ADMIN_DB_SSL` | `DB_SSL` | aus; `true` aktiviert TLS |
-| `ADMIN_DB_POOL_MAX` | `DB_POOL_MAX` | `10` |
-| `ADMIN_DB_MAX_PENDING_REQUESTS` | `DB_MAX_PENDING_REQUESTS` | `1000` |
-| `ADMIN_DB_OVERLOAD_RETRY_AFTER_SECONDS` | `DB_OVERLOAD_RETRY_AFTER_SECONDS` | `2` |
+| Variable | Standard im JackTools Backend |
+| --- | --- |
+| DATABASE_URL | nicht gesetzt |
+| DB_HOST | localhost |
+| DB_PORT | 5432 |
+| DB_NAME | jacktools |
+| DB_USER | jacktools |
+| DB_PASSWORD | nicht gesetzt |
+| DB_SSL | aus; true aktiviert TLS |
+| DB_POOL_MAX | 10 |
+| DB_MAX_PENDING_REQUESTS | 1000 |
+| DB_OVERLOAD_RETRY_AFTER_SECONDS | 2 |
 
 Eine gesetzte URL hat Vorrang vor Host, Port, Datenbankname, Benutzer und Passwort.
 SSL-, Pool- und Überlastvariablen gelten auch bei URL-Konfiguration.
 
 **Bewusster Sicherheitsunterschied zur Vorlage:** TLS-Zertifikate werden bei
-`ADMIN_DB_SSL=true`/`DB_SSL=true` überprüft; kein `rejectUnauthorized:false`.
+`DB_SSL=true` überprüft; kein `rejectUnauthorized:false`.
 Eine eigene CA kann über die Node-Variable `NODE_EXTRA_CA_CERTS` bereitgestellt
 werden. SSL nicht zusätzlich über URL-Queryparameter konfigurieren.
 
@@ -170,6 +172,7 @@ Wert als öffentliche API-Adresse eingebaut, ohne Entwicklungsproxy. Standard:
 - **Start: JackTools Backend** – Watch-Modus mit der unveränderten Datenbankadresse aus `.env`.
 - **Start: Company (JackTools Admin)** – Company auf Port 4321 mit lokaler API-Adresse.
 - **Start: JackTools Backend + Company Admin** – startet beide Konfigurationen gemeinsam.
+- **Build & ZIP: JackTools Backend** – prüft, baut frisch und erstellt backend/releases/jacktools-backend.zip.
 - **Build: JackTools Backend**, **Check: JackTools Backend**, **Test: JackTools Backend**.
 - **Setup: JackTools Backend Abhängigkeiten**, **Setup: JackTools Backend Migrationen**.
 - **Recovery: JackTools Root zurücksetzen (Sessions widerrufen)** – ausdrücklich destruktiv.
@@ -178,7 +181,7 @@ Wert als öffentliche API-Adresse eingebaut, ohne Entwicklungsproxy. Standard:
 Der gemeinsame Start setzt eine ausgefüllte lokale `.env` und Docker voraus; er
 verwendet den lokalen Komplettstart und führt damit ausdrücklich lokale Migrationen
 aus. Der normale Backendstart ohne „lokal komplett“ verwendet hingegen die
-konfigurierte Datenbank und führt keine Schemaänderungen aus. Die Launch-Einträge verwenden
+konfigurierte Datenbank und installiert dort ebenfalls automatisch ausstehende Migrationen. Die Launch-Einträge verwenden
 Node 24.17.0 über `npm exec`, entsprechend dem vorhandenen Muster im Repository.
 Der Backendbuild ist nicht Teil von „Build: Alle Seiten“ und wird nicht als statische
 Website verpackt.
@@ -231,21 +234,72 @@ mit einem isolierten Test-HTTP-Backend, ohne Betreiberzugangsdaten.
 ## Produktionsdeployment
 
 1. Eigene PostgreSQL-Datenbank und eigenen Benutzer anlegen. Für Migrationen sind
-   Schemaänderungsrechte nötig; Laufzeitrechte nach Möglichkeit separat begrenzen.
+   Schemaänderungsrechte für den App-Benutzer nötig, da der Datenbankaufbau beim Start erfolgt.
 2. `npm ci`, `npm run check`, `npm run build`; Backenddateien einschließlich
    `package.json`, Lockdatei, `dist/` **und `migrations/`** bereitstellen.
    Auf dem Server Laufzeitabhängigkeiten mit `npm ci --omit=dev` installieren.
 3. Erforderliche ENV konfigurieren: insbesondere `NODE_ENV=production`, `PORT`,
    `PUBLIC_BASE_URL=https://backend.jacktools.net`, eigene DB-Werte, Root und Sessionsecret,
    `ADMIN_ALLOWED_ORIGINS=https://jacktools.net` (gegebenenfalls zusätzlich die www-Origin).
-4. Migrationen vor dem Start ausführen. Ohne Dev-Abhängigkeiten:
-   `node dist/cli.js migrate`. Das SQL-Verzeichnis muss neben `dist/` vorhanden sein.
+4. Das SQL-Verzeichnis migrations/ muss neben dist/ vorhanden sein.
+   Beim Start werden ausstehende Migrationen automatisch installiert; kein CLI-Schritt nötig.
 5. Node-Einstieg `dist/server.js`; alternativ `npm start`. Serverport über HTTPS-Reverse-Proxy
    veröffentlichen. `TRUST_PROXY` passend zur tatsächlichen Proxykette setzen, nicht blind aktivieren.
 6. Company bauen und separat statisch deployen. Funktionierende Anmeldung und Cookies
    auf den echten HTTPS-Domains prüfen. Browser sieht keine Datenbank-Zugangsdaten.
 7. Datenbankbackup und Restore testen; Sessionsecretrotation macht Sessions ungültig.
    API und Migrationen gemeinsam versionieren, kein automatisches Zurückrollen von Datenverlust.
+
+### Automatischer Datenbankaufbau beim Start
+
+Jeder Backendstart wendet vor HTTP-Listener, Root-Bootstrap und Hintergrundjobs
+alle noch nicht installierten SQL-Migrationen in migrations/ an. Tabellen, Indizes
+und spätere Schemaerweiterungen entstehen damit ohne separaten CLI-Schritt.
+Bereits angewendete Migrationen werden anhand von Name und Prüfsumme übersprungen;
+bestehende Daten und Root-Zugangsdaten werden beim Neustart nicht zurückgesetzt.
+
+Die Migrationen laufen in einer Transaktion und verwenden eine PostgreSQL-
+Advisory-Sperre gegen gleichzeitige Schemaänderungen durch mehrere App-Starts.
+Bei einem Fehler wird zurückgerollt und der Backendstart abgebrochen.
+Bereits installierte SQL-Dateien nicht nachträglich ändern; für Änderungen eine
+neue Migration hinzufügen. Vor produktiven Updates die Datenbank sichern.
+
+Der PostgreSQL-Server, die Datenbank und der Benutzer müssen vorher existieren.
+Der konfigurierte DB-Benutzer benötigt Tabellen-/Indexerstellungs- und
+Schemaänderungsrechte. Das manuelle Kommando npm run migrate bleibt optional
+für Wartung und Diagnose verfügbar.
+
+### Upload-Paket per VS Code oder Terminal
+
+In „Ausführen und Debuggen“ den Eintrag **Build & ZIP: JackTools Backend** wählen.
+Alternativ im Ordner backend:
+
+~~~bash
+npm run deploy:zip
+~~~
+
+Das Paket liegt danach unter **backend/releases/jacktools-backend.zip**.
+Ein vorhandenes Paket wird erst nach erfolgreichem Build und Verpacken ersetzt.
+Der Vorgang prüft die Typen, bereinigt dist/, baut neu und verpackt ausschließlich
+dist/, migrations/, package.json, package-lock.json, README.md,
+die **Vorlage** .env.example und eine kurze DEPLOY.txt.
+Keine echte .env, keine node_modules, Datenbankdaten oder Logs werden eingepackt.
+Die ZIP-Erstellung verwendet nur Node.js-Bordmittel; kein ZIP-Programm nötig.
+Es werden keine Migrationen ausgeführt und keine Server gestartet.
+
+Auf dem Server in das nicht öffentlich statisch ausgelieferte Node-App-Verzeichnis
+entpacken. Die Dateien liegen direkt im Archiv, ohne zusätzlichen backend/-Ordner.
+Dann mit den beim Hoster hinterlegten Produktionsvariablen:
+
+~~~bash
+npm ci --omit=dev
+npm start
+~~~
+
+Bei einem Hoster mit eigener Prozessverwaltung stattdessen **dist/server.js**
+als Startdatei einstellen und die App über das Panel neu starten. Der Datenbankaufbau erfolgt automatisch.
+Die lokale .env nicht hochladen und .env.example nicht unverändert produktiv verwenden.
+Vor Updates die Datenbank sichern. releases/ ist von Git ausgeschlossen.
 
 ### Konkrete Domainkonfiguration
 
@@ -302,7 +356,7 @@ Vollbild verlassen und ein neuer QR-Code zum Koppeln angezeigt.
 
 ### Lokal testen
 
-1. `npm run migrate:local` anwenden und Backend starten, z. B. `npm run dev:local`.
+1. Backend starten, z. B. `npm run dev:local`; Tabellen werden beim Start automatisch angelegt.
 2. Clock separat auf Port 4322 starten: `cd ../clock && npm run dev -- --port 4322`.
 3. Empfänger in einem Fenster: `http://127.0.0.1:4322/de/stream/`.
 4. Sender im zweiten Fenster: `http://127.0.0.1:4322/de/`. Einstellungen wählen,
@@ -331,7 +385,7 @@ TV_STATE_SECRET=<eigener kryptografisch zufälliger Schlüssel mit mindestens 32
 `TV_STATE_SECRET` muss von `SESSION_SECRET` verschieden sein. Lokal wird ohne
 expliziten Schlüssel ein separater Entwicklungsschlüssel abgeleitet; produktiv
 ist diese Vereinfachung nicht erlaubt. TV ist in Produktion standardmäßig **aus**.
-Migration `002_tv.sql` vor dem Serverstart ausführen und Clock neu bauen/deployen.
+Migration `002_tv.sql` wird beim Backendstart automatisch angewendet. Clock neu bauen/deployen.
 Kein Vite-Proxy im Produktionshosting nötig. HTTPS auf beiden Domains, keine
 Caches für API-Antworten; Reverse-Proxy muss `Authorization` und `Origin` erhalten.
 TV darf ausschließlich seine eigene Origin verwenden, nicht automatisch Company
@@ -397,8 +451,8 @@ ausgelesen, aber **nicht** als vertrauenswürdig eingestuft.
 
 ### Einrichtung
 
-1. npm ci, npm run migrate (neue additive Migration 003_certificates.sql),
-   danach npm run build und Backend neu starten. Lokal: npm run migrate:local.
+1. npm ci, npm run build und Backend neu starten. Die additive Migration
+   003_certificates.sql wird automatisch angewendet. Lokal: npm run dev:local.
 2. Company neu bauen und deployen. Im Admin-Dashboard erscheint die Kachel
    **Zertifikatsprüfung**, erreichbar unter /{de,en,es,fr}/admin/certificates/.
 3. In der Backend-Umgebung aktivieren und eigene Domains ergänzen:
