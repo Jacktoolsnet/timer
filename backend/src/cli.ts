@@ -1,5 +1,5 @@
 import {loadEnvironment,loadConfig} from './config.js';
-import {Database} from './database.js';
+import {Database,databaseErrorHint} from './database.js';
 import {migrate,requireSchema} from './migrate.js';
 import {bootstrapRoot} from './bootstrap.js';
 loadEnvironment();
@@ -12,5 +12,5 @@ try{
  if(action==='migrate')await migrate(db);
  else{await requireSchema(db);await bootstrapRoot(db,config,true);}
  console.log(`${action}: complete`);
-}catch(error){console.error(error instanceof Error&&/^(Invalid|Set |Root|Unknown|Run |Pending)/.test(error.message)?error.message:'Command failed; check database connection and migration state');process.exitCode=1;}
+}catch(error){console.error(databaseErrorHint(error)||(error instanceof Error&&/^(Invalid|Set |Root|Unknown|Run |Pending)/.test(error.message)?error.message:'Command failed; check database connection and migration state'));process.exitCode=1;}
 finally{await db?.close();}

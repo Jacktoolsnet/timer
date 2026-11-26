@@ -6,17 +6,76 @@ TV-Kopplung und Zertifikatsüberwachung sind noch nicht implementiert.
 
 ## Voraussetzungen und erster Start
 
-Node.js **24.17.0 oder neuer** und eine eigene PostgreSQL-Datenbank (getestet mit
-PostgreSQL 15). Docker und Redis sind nicht nötig.
+Node.js **24.17.0 oder neuer** und PostgreSQL. Die lokalen Entwicklungsbefehle
+können eine eigene **Docker-PostgreSQL 17** starten. Für den Produktivbetrieb ist
+Docker nicht nötig; alternativ kann eine bereits eingerichtete Datenbank verwendet
+werden. Redis wird nicht benötigt.
+
+### Lokale Entwicklung mit eigener Datenbank
 
 ```bash
 cd backend
 npm ci
-cp .env.example .env
-# .env mit EIGENEN Datenbankdaten, Root-Passwort und zufälligem SESSION_SECRET ausfüllen.
-npm run migrate
-npm run dev
+cp .env.example .env   # nur wenn .env noch nicht existiert!
+# Eigene Passwörter und zufälliges SESSION_SECRET in .env eintragen.
+npm run dev:local
 ```
+
+`dev:local` startet die lokale Docker-Datenbank, wartet auf Bereitschaft, führt die
+Migrationen aus und startet dann das Backend mit Watch-Modus. Die Datenbank läuft
+nur auf **127.0.0.1:55433** und erhält ein eigenes Volume
+`jacktools-backend-local_jacktools_pg`. Sie teilt keine Daten mit NullTopic,
+MessageDrop oder einem PostgreSQL-Dienst auf dem Systemport 5432.
+
+Die vom Backend verwendeten Datenbanknamen, Benutzer und Passwörter werden aus
+`.env` gelesen (inklusive der bekannten `ADMIN_*`-/`DB_*`-Vorrangregeln). In den
+**lokalen Kindprozessen** werden nur Zielhost und Port auf diese Docker-Instanz
+umgestellt, eine konfigurierte URL entfernt und Datenbank-TLS für die lokale
+Verbindung ausgeschaltet. Die `.env` selbst bleibt unverändert. `NODE_ENV=production`
+und konfigurierte Remote-Datenbanken werden von den lokalen Befehlen abgelehnt.
+Einen anderen lokalen Port kannst du über `LOCAL_DB_PORT` einstellen.
+
+Einzeln:
+
+```bash
+npm run db:start          # Docker-DB starten und auf Bereitschaft warten
+npm run migrate:local     # nur die lokale Docker-DB migrieren
+npm run db:status
+npm run db:logs
+npm run db:stop           # stoppen, Daten bleiben erhalten
+```
+
+Beim Stoppen des Backend-Watchprozesses bleibt die Datenbank verfügbar. Die Daten
+bleiben auch nach einem Containerneustart im Volume. Ein automatisches Löschen oder
+Zurücksetzen des Volumes gibt es nicht.
+
+**Wichtig für eine bereits kopierte `.env` mit Port 5432:** `npm run migrate` nutzt
+weiterhin genau diese konfigurierte Adresse. Verwende für die neue lokale Datenbank
+`npm run migrate:local` bzw. `npm run dev:local`. Falls du bewusst auch die normalen
+Befehle lokal verwenden möchtest, setze selbst `ADMIN_DB_HOST=127.0.0.1` und
+`ADMIN_DB_PORT=55433` und entferne gegebenenfalls vorrangige Datenbank-URLs.
+
+**Passwortänderungen nach der Erstinitialisierung:** PostgreSQL übernimmt
+`POSTGRES_USER`, `POSTGRES_PASSWORD` und `POSTGRES_DB` nur beim Anlegen eines neuen
+Volumes. Eine spätere `.env`-Änderung ändert den vorhandenen Datenbankbenutzer nicht.
+Bei `28P01` deshalb Ziel und bestehende Zugangsdaten prüfen, nicht das Volume löschen.
+Gegebenenfalls das Passwort bewusst in PostgreSQL ändern und die Konfiguration
+angleichen. Root-Passwort und Datenbankpasswort sind getrennte Zugangsdaten.
+
+### Bereits vorhandene oder produktive Datenbank
+
+Die gewünschte Datenbank und den Benutzer zuerst auf dem PostgreSQL-Server anlegen,
+Berechtigungen vergeben und deren Werte in der Backend-Umgebung setzen. Erst dann:
+
+```bash
+npm run migrate
+npm run dev  # produktiv nach Build: npm start
+```
+
+Migrationen legen Tabellen an, aber **keinen PostgreSQL-Server und keinen
+PostgreSQL-Benutzer**. Fehler enthalten jetzt sichere Hinweise wie `28P01`
+(Anmeldung fehlgeschlagen), `3D000` (Datenbank fehlt) oder `ECONNREFUSED`
+(Server nicht erreichbar), ohne Passwörter oder Verbindungs-URLs auszugeben.
 
 Ein zufälliges Sessiongeheimnis lässt sich mit
 `node -e "console.log(require('node:crypto').randomBytes(32).toString('hex'))"`
@@ -33,6 +92,8 @@ und widerruft alle Root-Sitzungen:
 
 ```bash
 npm run root:reset -- --confirm
+# Für die lokale Docker-Datenbank, unabhängig vom .env-Zielport:
+npm run root:reset:local -- --confirm
 ```
 
 Die `.env` wird unabhängig vom Aufrufverzeichnis relativ zum Backend geladen.
@@ -98,7 +159,10 @@ Company-Seite und wird beim Build eingebaut. Standard im Produktionsbuild:
 
 `.vscode/launch.json` enthält:
 
-- **Start: JackTools Backend** – Entwicklung mit Watch-Modus.
+- **Start: JackTools Backend lokal komplett (DB + Migrationen + Server)** – lokale DB, Migrationen und Watch-Modus.
+- **Database: JackTools lokal starten/stoppen/Status/Logs** – separate Datenbanksteuerung.
+- **Setup: JackTools lokale Datenbank migrieren** – explizit die lokale Instanz.
+- **Start: JackTools Backend** – Watch-Modus mit der unveränderten Datenbankadresse aus `.env`.
 - **Start: Company (JackTools Admin)** – Company auf Port 4321 mit lokaler API-Adresse.
 - **Start: JackTools Backend + Company Admin** – startet beide Konfigurationen gemeinsam.
 - **Build: JackTools Backend**, **Check: JackTools Backend**, **Test: JackTools Backend**.
@@ -106,8 +170,10 @@ Company-Seite und wird beim Build eingebaut. Standard im Produktionsbuild:
 - **Recovery: JackTools Root zurücksetzen (Sessions widerrufen)** – ausdrücklich destruktiv.
 - **Test: JackTools Backend mit isolierter PostgreSQL** – braucht lokale PG-Werkzeuge.
 
-Der gemeinsame Start setzt eine ausgefüllte `.env` und vorherige Migrationen voraus.
-Startbefehle führen keine stillen Schemaänderungen aus. Die Launch-Einträge verwenden
+Der gemeinsame Start setzt eine ausgefüllte lokale `.env` und Docker voraus; er
+verwendet den lokalen Komplettstart und führt damit ausdrücklich lokale Migrationen
+aus. Der normale Backendstart ohne „lokal komplett“ verwendet hingegen die
+konfigurierte Datenbank und führt keine Schemaänderungen aus. Die Launch-Einträge verwenden
 Node 24.17.0 über `npm exec`, entsprechend dem vorhandenen Muster im Repository.
 Der Backendbuild ist nicht Teil von „Build: Alle Seiten“ und wird nicht als statische
 Website verpackt.

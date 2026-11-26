@@ -35,3 +35,27 @@ test('passwords salted, verified safely, tokens are domain separated',async()=>{
  assert.notEqual(one,two);assert.ok(await verifyPassword('test-password-123!',one));assert.equal(await verifyPassword('wrong',one),false);
  assert.equal(await verifyPassword('anything','invalid'),false);assert.notEqual(digest('key','session:token'),digest('key','csrf:token'));assert.equal(equal('x','xx'),false);
 });
+
+test('explicit local database environment preserves credentials and leaves source untouched',async()=>{
+ const {localDatabaseEnvironment}=await import('../src/local-config.js');
+ const input={...env,ADMIN_DB_HOST:'localhost',ADMIN_DB_PORT:'5432',ADMIN_DB_USER:'local_jt',ADMIN_DB_NAME:'local_jt',ADMIN_DB_PASSWORD:'local-db-$-#-secret',ADMIN_DB_SSL:'true'};
+ const before={...input};const result=localDatabaseEnvironment(input);
+ assert.deepEqual(input,before);assert.equal(result.ADMIN_DB_PORT,'55433');assert.equal(result.ADMIN_DB_HOST,'127.0.0.1');assert.equal(result.ADMIN_DB_SSL,'false');assert.equal(result.ADMIN_DB_PASSWORD,input.ADMIN_DB_PASSWORD);
+ assert.equal(result.ADMIN_DATABASE_URL,'');assert.equal(result.DATABASE_URL,'');assert.equal(result.ROOT_PASSWORD,undefined);
+ const url=localDatabaseEnvironment({ADMIN_DATABASE_URL:'postgresql://local_user:secret%24%23@127.0.0.1:5432/local_name',LOCAL_DB_PORT:'55435'});
+ assert.equal(url.ADMIN_DB_USER,'local_user');assert.equal(url.ADMIN_DB_PASSWORD,'secret$#');assert.equal(url.ADMIN_DB_NAME,'local_name');assert.equal(url.ADMIN_DB_PORT,'55435');
+});
+test('local commands reject production, remote targets, placeholders and invalid ports',async()=>{
+ const {localDatabaseEnvironment}=await import('../src/local-config.js');
+ const local={ADMIN_DB_PASSWORD:'some-local-password'};
+ assert.throws(()=>localDatabaseEnvironment({...local,NODE_ENV:'production'}),/production/);
+ assert.throws(()=>localDatabaseEnvironment({...local,ADMIN_DB_HOST:'database.example.test'}),/remote/);
+ assert.throws(()=>localDatabaseEnvironment({ADMIN_DB_PASSWORD:'replace-me'}),/password/);
+ assert.throws(()=>localDatabaseEnvironment({...local,LOCAL_DB_PORT:'0'}),/LOCAL_DB_PORT/);
+});
+test('database diagnostics show only known codes and never raw server details',async()=>{
+ const {databaseErrorHint}=await import('../src/database.js');
+ assert.match(databaseErrorHint({code:'28P01',message:'password=secret'})!,/28P01/);
+ assert.ok(!databaseErrorHint({code:'28P01',message:'password=secret'})!.includes('password=secret'));
+ assert.equal(databaseErrorHint({code:'UNKNOWN',message:'secret connection string'}),undefined);
+});

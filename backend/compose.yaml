@@ -1,0 +1,20 @@
+# Local development only. Use npm run db:start to supply the backend .env credentials.
+name: jacktools-backend-local
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: ${JT_LOCAL_DB_USER:?Use npm run db:start}
+      POSTGRES_PASSWORD: ${JT_LOCAL_DB_PASSWORD:?Use npm run db:start}
+      POSTGRES_DB: ${JT_LOCAL_DB_NAME:?Use npm run db:start}
+    ports:
+      - "127.0.0.1:${JT_LOCAL_DB_PORT:-55433}:5432"
+    volumes:
+      - jacktools_pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+volumes:
+  jacktools_pg:

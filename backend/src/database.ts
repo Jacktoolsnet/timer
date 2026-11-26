@@ -22,3 +22,16 @@ export class Database{
  });}
  close(){return this.pool.end();}
 }
+
+/** Safe operational hints: never echo a server error message, URL or credential. */
+export function databaseErrorHint(error:unknown):string|undefined{
+ const code=error&&typeof error==='object'&&'code' in error?String(error.code):'';
+ const hints:Record<string,string>={
+  '28P01':'Database authentication failed (28P01). Check target/user/password. For local Docker: npm run db:start, then npm run migrate:local.',
+  '3D000':'Configured database does not exist (3D000). Create it first, or start the local Docker database.',
+  '42501':'Database permission denied (42501). The migration user needs schema creation rights.',
+  'ECONNREFUSED':'Database connection refused. Start the database and check its host/port. For local Docker use npm run db:start.',
+  'ETIMEDOUT':'Database connection timed out. Check host/port and network access.',
+ };
+ return hints[code];
+}

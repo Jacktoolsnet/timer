@@ -2,6 +2,48 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "name": "Start: JackTools Backend lokal komplett (DB + Migrationen + Server)",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "npm exec --yes --package=node@24.17.0 --package=npm@11 -- npm run dev:local",
+      "cwd": "${workspaceFolder}/backend"
+    },
+    {
+      "name": "Database: JackTools lokal starten",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "npm exec --yes --package=node@24.17.0 --package=npm@11 -- npm run db:start",
+      "cwd": "${workspaceFolder}/backend"
+    },
+    {
+      "name": "Database: JackTools lokal stoppen (Daten bleiben erhalten)",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "npm exec --yes --package=node@24.17.0 --package=npm@11 -- npm run db:stop",
+      "cwd": "${workspaceFolder}/backend"
+    },
+    {
+      "name": "Database: JackTools lokal Status",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "npm exec --yes --package=node@24.17.0 --package=npm@11 -- npm run db:status",
+      "cwd": "${workspaceFolder}/backend"
+    },
+    {
+      "name": "Database: JackTools lokal Logs",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "npm exec --yes --package=node@24.17.0 --package=npm@11 -- npm run db:logs",
+      "cwd": "${workspaceFolder}/backend"
+    },
+    {
+      "name": "Setup: JackTools lokale Datenbank migrieren",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "npm exec --yes --package=node@24.17.0 --package=npm@11 -- npm run migrate:local",
+      "cwd": "${workspaceFolder}/backend"
+    },
+    {
       "name": "Start: JackTools Backend",
       "type": "node-terminal",
       "request": "launch",
@@ -333,6 +375,13 @@
       "skipFiles": [
         "<node_internals>/**"
       ]
+    },
+    {
+      "name": "Recovery: JackTools lokalen Root zurücksetzen (Sessions widerrufen)",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "npm exec --yes --package=node@24.17.0 --package=npm@11 -- npm run root:reset:local -- --confirm",
+      "cwd": "${workspaceFolder}/backend"
     }
   ],
   "inputs": [
@@ -352,7 +401,7 @@
     {
       "name": "Start: JackTools Backend + Company Admin",
       "configurations": [
-        "Start: JackTools Backend",
+        "Start: JackTools Backend lokal komplett (DB + Migrationen + Server)",
         "Start: Company (JackTools Admin)"
       ],
       "stopAll": true

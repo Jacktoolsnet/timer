@@ -17,7 +17,14 @@
     "root:reset": "tsx src/cli.ts root:reset",
     "test": "tsx --test test/unit.test.ts",
     "test:integration": "tsx --test test/integration.test.ts",
-    "test:local": "node scripts/test-postgres.mjs"
+    "test:local": "node scripts/test-postgres.mjs",
+    "db:start": "tsx src/local-dev.ts db:start",
+    "db:stop": "tsx src/local-dev.ts db:stop",
+    "db:status": "tsx src/local-dev.ts db:status",
+    "db:logs": "tsx src/local-dev.ts db:logs",
+    "migrate:local": "tsx src/local-dev.ts migrate:local",
+    "dev:local": "tsx src/local-dev.ts dev:local",
+    "root:reset:local": "tsx src/local-dev.ts root:reset:local"
   },
   "dependencies": {
     "dotenv": "^17.2.3",

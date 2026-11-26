@@ -1,5 +1,5 @@
 import {loadEnvironment,loadConfig} from './config.js';
-import {Database} from './database.js';
+import {Database,databaseErrorHint} from './database.js';
 import {requireSchema} from './migrate.js';
 import {bootstrapRoot} from './bootstrap.js';
 import {createApp} from './app.js';
@@ -25,6 +25,6 @@ try{
  process.on('SIGTERM',shutdown);process.on('SIGINT',shutdown);
 }catch(error){
  // Configuration errors contain variable names only, never supplied values/connection URLs.
- console.error(JSON.stringify({event:'startup_failed',message:error instanceof Error&&/^(Invalid|Set |Run |Pending)/.test(error.message)?error.message:'Check database connection, schema and root configuration'}));
+ console.error(JSON.stringify({event:'startup_failed',message:databaseErrorHint(error)||(error instanceof Error&&/^(Invalid|Set |Run |Pending)/.test(error.message)?error.message:'Check database connection, schema and root configuration')}));
  await db?.close();process.exitCode=1;
 }
