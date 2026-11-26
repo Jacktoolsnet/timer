@@ -382,3 +382,14 @@ als vorbereitet, Agenten als geplant gekennzeichnet. Die Sitemap umfasst nun
   Titel und Beschreibungen; keine deutschen Texte als Bild in fremden Sprachen.
 - Bei redaktionellen Änderungen alle vier Sprachfassungen aktualisieren.
 - Tests: `npx playwright test tests/blog.spec.ts tests/surface-blog.spec.ts tests/blog-locales.spec.ts`.
+
+## Integrierte Administration
+
+Die bestehende Company-Seite enthält jetzt `/de/admin/` sowie die drei anderen
+Sprachvarianten und `/admin/`. API, Root-Zugang und PostgreSQL laufen ausschließlich
+im eigenständigen Projekt `../backend/`. Die Company-Seite bleibt statisch.
+
+Lokale API-Adresse: `PUBLIC_BACKEND_URL=http://127.0.0.1:4340` (öffentlicher Wert).
+Produktionsstandard: `https://backend.jacktools.net`. Keine Root- oder DB-Geheimnisse
+im Frontend. Start, ENV-Namen, VS-Code-Einträge und Sicherheitsgrenzen stehen in
+[`../backend/README.md`](../backend/README.md).

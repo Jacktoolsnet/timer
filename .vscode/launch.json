@@ -2,6 +2,72 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "name": "Start: JackTools Backend",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "npm exec --yes --package=node@24.17.0 --package=npm@11 -- npm run dev",
+      "cwd": "${workspaceFolder}/backend"
+    },
+    {
+      "name": "Start: Company (JackTools Admin)",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "npm exec --yes --package=node@24.17.0 --package=npm@11 -- npm run dev -- --port 4321",
+      "cwd": "${workspaceFolder}/company",
+      "env": {
+        "PUBLIC_BACKEND_URL": "http://127.0.0.1:4340"
+      }
+    },
+    {
+      "name": "Build: JackTools Backend",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "npm exec --yes --package=node@24.17.0 --package=npm@11 -- npm run build",
+      "cwd": "${workspaceFolder}/backend"
+    },
+    {
+      "name": "Check: JackTools Backend",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "npm exec --yes --package=node@24.17.0 --package=npm@11 -- npm run check",
+      "cwd": "${workspaceFolder}/backend"
+    },
+    {
+      "name": "Test: JackTools Backend",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "npm exec --yes --package=node@24.17.0 --package=npm@11 -- npm test",
+      "cwd": "${workspaceFolder}/backend"
+    },
+    {
+      "name": "Test: JackTools Backend mit isolierter PostgreSQL",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "npm exec --yes --package=node@24.17.0 --package=npm@11 -- npm run test:local",
+      "cwd": "${workspaceFolder}/backend"
+    },
+    {
+      "name": "Setup: JackTools Backend Abhängigkeiten",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "npm exec --yes --package=node@24.17.0 --package=npm@11 -- npm ci",
+      "cwd": "${workspaceFolder}/backend"
+    },
+    {
+      "name": "Setup: JackTools Backend Migrationen",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "npm exec --yes --package=node@24.17.0 --package=npm@11 -- npm run migrate",
+      "cwd": "${workspaceFolder}/backend"
+    },
+    {
+      "name": "Recovery: JackTools Root zurücksetzen (Sessions widerrufen)",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "npm exec --yes --package=node@24.17.0 --package=npm@11 -- npm run root:reset -- --confirm",
+      "cwd": "${workspaceFolder}/backend"
+    },
+    {
       "name": "Build: Company",
       "type": "node-terminal",
       "request": "launch",
@@ -280,6 +346,16 @@
       "type": "promptString",
       "description": "NullTopic password (at least 12 characters; paste is supported)",
       "password": true
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Start: JackTools Backend + Company Admin",
+      "configurations": [
+        "Start: JackTools Backend",
+        "Start: Company (JackTools Admin)"
+      ],
+      "stopAll": true
     }
   ]
 }

@@ -1,0 +1,32 @@
+---
+import Layout from '../layouts/Layout.astro';
+import {adminText} from '../lib/admin-text';
+import type {Language} from '../lib/i18n';
+import '../styles/admin.css';
+const {lang}=Astro.props as {lang:Language};const t=adminText[lang];
+const api=import.meta.env.PUBLIC_BACKEND_URL||(import.meta.env.DEV?'http://127.0.0.1:4340':'https://backend.jacktools.net');
+---
+<Layout lang={lang} title={t.title} description={t.intro} route="admin" noindex homeAlternates={false} canonicalPath={`/${lang}/admin/`} quietBackground>
+ <section class="jt-admin" id="jt-admin" data-api={api} data-text={JSON.stringify(t)}>
+  <header class="admin-heading"><p class="eyebrow">JACKTOOLS / ADMIN</p><h1>{t.title}</h1><p>{t.intro}</p></header>
+  <p id="admin-status" role="status" aria-live="polite">{t.loading}</p>
+  <section class="admin-card admin-login" id="admin-login-panel">
+   <h2>{t.login}</h2><p>{t.notConfigured}</p>
+   <form id="admin-login-form"><label>{t.username}<input name="username" autocomplete="username" required minlength="3" maxlength="64" /></label><label>{t.password}<input name="password" type="password" autocomplete="current-password" required maxlength="128" /></label><button class="primary" type="submit">{t.login}</button></form>
+  </section>
+  <div id="admin-workspace" hidden>
+   <div class="admin-session-bar"><p>{t.welcome} <strong id="admin-identity"></strong> <span id="admin-role" class="admin-badge"></span></p><button id="admin-logout" type="button" class="secondary">{t.logout}</button></div>
+   <p id="admin-password-required" class="admin-warning" hidden>{t.required}</p>
+   <div class="admin-grid">
+    <section class="admin-card" id="admin-profile-panel"><h2>{t.profile}</h2><form id="admin-profile-form"><label>{t.displayName}<input name="displayName" maxlength="100" autocomplete="nickname" /></label><label>{t.email}<input name="email" type="email" maxlength="254" autocomplete="email" /></label><button class="primary" type="submit">{t.save}</button></form></section>
+    <section class="admin-card"><h2>{t.security}</h2><form id="admin-password-form"><label>{t.currentPassword}<input name="currentPassword" type="password" required maxlength="128" autocomplete="current-password" /></label><label>{t.newPassword}<input name="newPassword" type="password" required minlength="12" maxlength="128" autocomplete="new-password" /></label><p class="admin-hint">{t.passwordHint}</p><button class="primary" type="submit">{t.changePassword}</button></form></section>
+   </div>
+   <section id="admin-users-panel" hidden>
+    <section class="admin-card"><h2>{t.users}</h2><div id="admin-users" class="admin-user-list"></div></section>
+    <section class="admin-card"><h2>{t.create}</h2><form id="admin-create-form" class="admin-create-grid"><label>{t.username}<input name="username" required minlength="3" maxlength="64" pattern="[a-zA-Z0-9][a-zA-Z0-9_.\-]{2,63}" autocomplete="off" /></label><label>{t.displayName}<input name="displayName" maxlength="100" autocomplete="off" /></label><label>{t.email}<input name="email" type="email" maxlength="254" autocomplete="off" /></label><label>{t.temporaryPassword}<input name="password" type="password" required minlength="12" maxlength="128" autocomplete="new-password" /></label><p class="admin-hint">{t.passwordHint}</p><button class="primary" type="submit">{t.create}</button></form></section>
+   </section>
+  </div>
+  <dialog id="admin-reset-dialog" aria-labelledby="admin-reset-title"><div class="dialog-inner"><h2 id="admin-reset-title">{t.resetTitle}</h2><p id="admin-reset-username"></p><p>{t.resetHint}</p><form id="admin-reset-form"><label>{t.temporaryPassword}<input name="password" type="password" required minlength="12" maxlength="128" autocomplete="new-password" /></label><p id="admin-reset-error" role="status"></p><div class="dialog-actions"><button type="submit" class="primary">{t.submitReset}</button><button type="button" class="secondary" id="admin-reset-cancel">{t.close}</button></div></form></div></dialog>
+ </section>
+</Layout>
+<script src="../scripts/admin.ts"></script>

@@ -1,6 +1,6 @@
 # Umsetzungsplan für das eigenständige JackTools Backend
 
-Stand: 26. November 2026. Status: Planung, noch kein implementierter Backenddienst.
+Stand: 26. November 2026. Status: Erster Backend- und Company-Adminstand lokal implementiert; TV-Kopplung und Zertifikatsüberwachung noch geplant.
 
 ## Ziel und Abgrenzung
 
@@ -216,7 +216,7 @@ Vorgeschlagene Namen, endgültige Form im ersten Backend-Schritt festlegen:
 | Variable | Zweck |
 | --- | --- |
 | `NODE_ENV`, `PORT`, `PUBLIC_BASE_URL` | Betriebsart, Hostport, `https://backend.jacktools.net` |
-| `DATABASE_URL` | Ausschließlich eigene JackTools-Datenbank |
+| `ADMIN_DATABASE_URL` / `DATABASE_URL` oder `ADMIN_DB_*` / `DB_*` | Ausschließlich eigene JackTools-Datenbank; Namen und Vorrang wie im MessageDrop-Adminbackend |
 | `ROOT_USERNAME`, `ROOT_PASSWORD`, optional `ROOT_EMAIL` | Initialer Root und explizite Wiederherstellung |
 | `SESSION_SECRET` | Eigenes, zufälliges Sessiongeheimnis |
 | `STATE_ENCRYPTION_KEY` | Eigener Schlüssel für sensible TV-Snapshots |
@@ -317,9 +317,11 @@ Vor öffentlicher Freigabe des TV-Modus Löschfristen und Datenschutztexte anpas
 
 ## Nächster Umsetzungsschritt
 
-Zuerst Etappe 1 und 2 als kleinen, eigenständig testbaren Verwaltungsstand umsetzen.
-Danach TV-Kopplung und erst anschließend die Zertifikatsüberwachung. Dieser Plan
-implementiert das neue Backend noch nicht und veröffentlicht keine Änderungen.
+Etappe 1 und 2 sind als erster lokaler Verwaltungsstand unter `backend/` und in
+der bestehenden Company-Seite angelegt. Einrichtung und genaue ENV-Konfiguration
+stehen in `backend/README.md`. Als Nächstes folgt die Abnahme mit eigener
+Serverkonfiguration; danach TV-Kopplung und anschließend Zertifikatsüberwachung.
+Es wurde nichts veröffentlicht.
 
 Technische Referenz zur Sessionabsicherung:
 [Express Produktionssicherheit](https://expressjs.com/en/advanced/best-practice-security/)
