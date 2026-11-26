@@ -1,16 +1,38 @@
+import {createReceiverControls} from './tv-receiver-controls';
 import {createTvScanner} from './tv-scanner';
 import {createTvKeypad} from './tv-keypad';
 import QRCode from 'qrcode';
 import type {tvText} from '../lib/tv-text';
-export type TvSnapshot={version:1;settings:Record<string,string|number|boolean>;appearance:{palette:string;style:string;theme:string;fontSize:string};language:string};
+export type TvSnapshot={version:1;settings:Record<string,string|number|boolean>;appearance:{palette:string;style:string;theme:string;fontSize:string};language:string;senderName?:string};
 type State={state:'waiting'|'pending'|'active'|'detached';revision:number;acknowledged:number;snapshot?:TvSnapshot};
+// Browsers do not expose a reliable device hostname. Send only a coarse, advisory label.
+export function senderDeviceName(){
+ const ua=navigator.userAgent;
+ const browser=/Edg\//.test(ua)?'Edge':/OPR\//.test(ua)?'Opera':/Firefox\/|FxiOS\//.test(ua)?'Firefox':/Chrome\/|CriOS\//.test(ua)?'Chrome':/Safari\//.test(ua)?'Safari':'Browser';
+ const os=/iPhone/.test(ua)?'iPhone':/iPad/.test(ua)||(/Macintosh/.test(ua)&&navigator.maxTouchPoints>1)?'iPad':/Android/.test(ua)?'Android':/Windows/.test(ua)?'Windows':/Macintosh|Mac OS X/.test(ua)?'macOS':/Linux/.test(ua)?'Linux':'';
+ return [browser,os].filter(Boolean).join(' · ');
+}
 class TvError extends Error{constructor(public status:number,public code:string){super(code);}}
 export function createClockTv(options:{snapshot:()=>TvSnapshot;apply:(snapshot:TvSnapshot)=>void}){
  const root=document.getElementById('clock-tv');if(!root)return;
  const t=JSON.parse(root.dataset.text!) as typeof tvText.en,receiver=root.dataset.receiver==='true';
  const $=(id:string)=>document.getElementById(id)!;
+ // Preview renders the same clock in an isolated frame, without pairing, location or wake lock.
+ if(receiver&&window.parent!==window&&new URLSearchParams(location.search).get('preview')==='1'){
+  document.body.classList.add('tv-preview','tv-ready');
+  window.addEventListener('message',event=>{
+   if(event.source!==window.parent||event.origin!==location.origin||event.data?.type!=='clock-stream-preview')return;
+   const snapshot=event.data.snapshot as TvSnapshot;
+   if(snapshot?.version===1&&snapshot.settings&&snapshot.appearance)options.apply(snapshot);
+  });
+  window.parent.postMessage({type:'clock-stream-preview-ready'},location.origin);
+  return;
+ }
+
+ const receiverControls=receiver?createReceiverControls($('tv-controls')):undefined;
  const base=root.dataset.api!.replace(/\/$/,'');
  let session:{id:string;token:string}|undefined,revision=0,lastSent='',timer:number|undefined,busy=false,backoff=2000,running=false,qrSecret='';
+ let pendingSnapshot:TvSnapshot|undefined,lastPreview='';
  let keypad:ReturnType<typeof createTvKeypad>|undefined;
  let scanner:ReturnType<typeof createTvScanner>|undefined;
  const status=(value:string)=>{ $('tv-status').textContent=value;const live=document.getElementById('tv-live-status');if(live)live.textContent=value;};
@@ -23,7 +45,30 @@ export function createClockTv(options:{snapshot:()=>TvSnapshot;apply:(snapshot:T
  }
  function schedule(delay=2000){window.clearTimeout(timer);if(session)timer=window.setTimeout(()=>void poll(),delay);}
  function forget(){window.clearTimeout(timer);session=undefined;revision=0;lastSent='';}
- function showReceiver(ready:boolean){document.body.classList.toggle('tv-ready',ready);$('tv-receiver-panel').hidden=ready;$('tv-controls').hidden=!ready;}
+ function clearPreview(){
+  pendingSnapshot=undefined;lastPreview='';
+  const frame=document.getElementById('tv-preview') as HTMLIFrameElement|null;
+  frame?.removeAttribute('src');frame?.removeAttribute('data-loaded');
+  document.getElementById('tv-receiver-panel')?.removeAttribute('data-pending');
+ }
+ function sendPreview(){
+  const frame=document.getElementById('tv-preview') as HTMLIFrameElement|null;
+  if(pendingSnapshot&&frame?.dataset.loaded==='true'){
+   const serialized=JSON.stringify(pendingSnapshot);if(serialized===lastPreview)return;
+   frame.contentWindow?.postMessage({type:'clock-stream-preview',snapshot:pendingSnapshot},location.origin);lastPreview=serialized;
+  }
+ }
+ if(receiver){
+  window.addEventListener('message',event=>{
+   const frame=$('tv-preview') as HTMLIFrameElement;
+   if(event.origin===location.origin&&event.source===frame.contentWindow&&event.data?.type==='clock-stream-preview-ready'){
+    frame.dataset.loaded='true';sendPreview();
+   }
+  });
+  const box=$('tv-preview').parentElement!;
+  new ResizeObserver(()=>box.style.setProperty('--preview-scale',String(box.clientWidth/960))).observe(box);
+ }
+ function showReceiver(ready:boolean){receiverControls?.setActive(ready);document.body.classList.toggle('tv-ready',ready);$('tv-receiver-panel').hidden=ready;$('tv-controls').hidden=!ready;}
  async function poll(){
   if(busy){schedule();return;}if(!session)return;busy=true;
   try{
@@ -31,9 +76,15 @@ export function createClockTv(options:{snapshot:()=>TvSnapshot;apply:(snapshot:T
    if(receiver){
     if(state.state==='pending'){
      $('tv-proposal').hidden=false;$('tv-approve').hidden=false;$('tv-reject').hidden=false;$('tv-qr').hidden=true;$('tv-code').hidden=true;
-     $('tv-preview').textContent=state.snapshot?`${state.snapshot.settings.view} · ${state.snapshot.settings.zone}`:'';status(t.pending);
+     const first=!pendingSnapshot;pendingSnapshot=state.snapshot;
+     $('tv-receiver-panel').dataset.pending='true';
+     $('tv-sender-name').textContent=state.snapshot?.senderName||t.unknownDevice;
+     const frame=$('tv-preview') as HTMLIFrameElement;
+     if(!frame.hasAttribute('src'))frame.src='/'+document.documentElement.lang+'/stream/?preview=1';
+     sendPreview();status('');
+     if(first) $('tv-approve').focus();
     }else if((state.state==='active'||state.state==='detached')&&state.snapshot){
-     if(revision<state.revision){options.apply(state.snapshot);running=true;showReceiver(true);revision=state.revision;}
+     if(revision<state.revision){clearPreview();options.apply(state.snapshot);running=true;showReceiver(true);revision=state.revision;}
      if(state.state==='active'&&state.acknowledged!==state.revision)await api(session.id+'/ack','POST',{revision:state.revision});
      status('');
      if(state.state==='detached'){forget();status(t.expired);return;}
@@ -49,7 +100,7 @@ export function createClockTv(options:{snapshot:()=>TvSnapshot;apply:(snapshot:T
    }
    schedule(receiver||!running?2000:4000);
   }catch(error){
-   if(error instanceof TvError&&[401,404,410].includes(error.status)){forget();status(t.expired);if(receiver){$('tv-retry').hidden=false;if(!running){$('tv-qr').hidden=true;$('tv-code').hidden=true;$('tv-approve').hidden=true;$('tv-reject').hidden=true;}}else{setSenderConnected(false);}return;}
+   if(error instanceof TvError&&[401,404,410].includes(error.status)){forget();status(t.expired);if(receiver){clearPreview();$('tv-proposal').hidden=true;$('tv-retry').hidden=false;if(!running){$('tv-qr').hidden=true;$('tv-code').hidden=true;$('tv-approve').hidden=true;$('tv-reject').hidden=true;}}else{setSenderConnected(false);}return;}
    if(error instanceof TvError&&error.status===409){schedule();return;}
    status(t.offline);backoff=Math.min(backoff*2,30000);schedule(backoff);
   }finally{busy=false;}
@@ -58,7 +109,7 @@ export function createClockTv(options:{snapshot:()=>TvSnapshot;apply:(snapshot:T
  async function action(button:HTMLButtonElement,work:()=>Promise<void>){if(busy)return;busy=true;button.disabled=true;try{await work();}catch(error){if(error instanceof TvError&&error.code==='invalid_pairing'&&!receiver)setSenderConnected(false);status(error instanceof TvError&&error.code==='invalid_pairing'?t.invalid:t.failed);}finally{busy=false;button.disabled=false;keypad?.sync();schedule();}}
  if(receiver){
   async function start(){
-   forget();running=false;showReceiver(false);status('');$('tv-retry').hidden=true;$('tv-proposal').hidden=true;$('tv-approve').hidden=true;$('tv-reject').hidden=true;$('tv-qr').hidden=true;$('tv-code').hidden=false;$('tv-code').textContent='…';
+   clearPreview();forget();running=false;showReceiver(false);status('');$('tv-retry').hidden=true;$('tv-proposal').hidden=true;$('tv-approve').hidden=true;$('tv-reject').hidden=true;$('tv-qr').hidden=true;$('tv-code').hidden=false;$('tv-code').textContent='…';
    try{
     const created=await api<{id:string;receiverToken:string;pairToken:string;code:string}>('receivers','POST',{},'');
     session={id:created.id,token:created.receiverToken};$('tv-code').textContent=created.code.replace(/(\d{4})(\d{4})/,'$1 $2');
@@ -68,14 +119,13 @@ export function createClockTv(options:{snapshot:()=>TvSnapshot;apply:(snapshot:T
    }catch{status(t.failed);$('tv-code').textContent='';$('tv-retry').hidden=false;}
   }
   $('tv-approve').addEventListener('click',event=>void action(event.currentTarget as HTMLButtonElement,async()=>{
+   receiverControls?.requestFullscreen();
    await api(session!.id+'/approve','POST',{});schedule(10);
-   // Fullscreen must be requested during a user gesture; the dedicated button remains available.
   }));
   async function stop(){if(session)await api(session.id+'/stop','POST',{});forget();running=false;document.body.classList.remove('tv-ready');await start();}
   $('tv-reject').addEventListener('click',event=>void action(event.currentTarget as HTMLButtonElement,stop));
   $('tv-stop').addEventListener('click',event=>void action(event.currentTarget as HTMLButtonElement,stop));
   $('tv-retry').addEventListener('click',event=>void action(event.currentTarget as HTMLButtonElement,async()=>{if(session)await api(session.id+'/stop','POST',{});await start();}));
-  $('tv-fullscreen').addEventListener('click',()=>{void document.documentElement.requestFullscreen?.().catch(()=>{});});
   void start();
  }else{
   const dialog=$('tv-dialog') as HTMLDialogElement;

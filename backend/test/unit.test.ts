@@ -1,3 +1,4 @@
+import {validateSnapshot} from '../src/tv-snapshot.js';
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {createDbConfigFromEnv,databaseLimits,loadConfig} from '../src/config.js';
@@ -66,4 +67,13 @@ test('TV is opt-in in production, separate from admin origins and requires an en
  assert.throws(()=>loadConfig({...env,TV_ALLOWED_ORIGINS:'*'}),/TV_ALLOWED_ORIGINS/);
  assert.throws(()=>loadConfig({...env,NODE_ENV:'production',TV_ALLOWED_ORIGINS:'http://clock.jacktools.net'}),/TV_ALLOWED_ORIGINS/);
  assert.equal(loadConfig({...env,NODE_ENV:'production',TV_ENABLED:'true',TV_STATE_SECRET:'test-tv-state-encryption-secret-long-enough'}).tv.enabled,true);
+});
+
+const tvSnapshot={version:1,language:'de',settings:{view:'orbit',analogReadout:'off',binaryReadout:'off',orbitReadout:'flip',sundialReadout:'flip',analogDesign:'square-roman',background:'mountains',animateBackground:true,hemisphere:'north',transparency:35,date:'long',dateView:'calendarDate',format:'medium',hourCycle:'24',zone:'Europe/Berlin',seconds:true,numbers:true,smooth:true},appearance:{palette:'blue',style:'technical',theme:'dark',fontSize:'1'}};
+test('stream device label is optional, short and cannot contain control or bidi characters',()=>{
+ assert.equal(validateSnapshot(tvSnapshot).senderName,undefined);
+ assert.equal(validateSnapshot({...tvSnapshot,senderName:'Chrome · Android'}).senderName,'Chrome · Android');
+ for(const senderName of ['', ' '.repeat(4),'x'.repeat(81),'Phone\nAdmin','Phone\u202eAdmin',42,null]){
+  assert.throws(()=>validateSnapshot({...tvSnapshot,senderName}));
+ }
 });

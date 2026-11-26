@@ -287,7 +287,17 @@ gegebenenfalls Mehrfaktoranmeldung für Root prüfen. Es wurde nichts deployed.
 
 Erster TV-Stand implementiert, ohne Cast SDK und ohne Admin-Konto. Die Company-
 Administration und TV-Capabilities sind vollständig getrennt. Kein Videostream:
-Die TV-Uhr rendert selbst, die API überträgt lediglich Darstellungseinstellungen.
+Die TV-Uhr rendert selbst, die API überträgt Darstellungseinstellungen und eine grobe
+Gerätebezeichnung (z. B. „Chrome · Android“, kein Hostname oder vollständiger User-Agent).
+Vor der Freigabe zeigt der Empfänger diese Bezeichnung und eine echte, isolierte
+Uhrvorschau. Die Bezeichnung ist nur ein Hinweis, kein verifizierter Gerätename.
+Die Vorschau erstellt keine Verbindung und fordert weder Standort noch Wake-Lock an.
+Beim Bestätigen fordert der Empfänger direkt im Benutzerereignis Vollbild an.
+Browser ohne Fullscreen-Unterstützung oder mit Sperre bleiben in der bildfüllenden
+Fokusansicht. Die beiden Steuerbuttons verschwinden nach fünf Sekunden Inaktivität.
+Fernbedienungstasten, Maus und Touch blenden sie wieder ein; die erste Taste nach
+dem Ausblenden weckt nur die Bedienung (kein versehentliches Beenden).
+Pfeiltasten wechseln zwischen Vollbild und Stream beenden; Enter aktiviert.
 
 ### Lokal testen
 

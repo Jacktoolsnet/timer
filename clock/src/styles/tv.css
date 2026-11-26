@@ -38,3 +38,26 @@
 .tv-receiver-url svg{width:16px;height:16px;flex-shrink:0;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
 #tv-pair-hint .tv-receiver-url:hover{text-decoration:underline;text-underline-offset:4px}
 .tv-receiver-url:focus-visible{outline:3px solid var(--accent);outline-offset:4px;border-radius:4px}
+
+/* Approval contains only the actual clock, the sender label and two actions. */
+.tv-receiver #clock-focus{display:none!important}
+.tv-panel[data-pending] .tv-pairing-info{display:none}
+.tv-panel[data-pending]{width:min(620px,calc(100vw - 48px));padding:20px}
+.tv-panel #tv-status:empty{display:none}
+.tv-clock-preview{position:relative;width:100%;aspect-ratio:16/9;overflow:hidden;border:1px solid var(--line);border-radius:16px;background:var(--bg);--preview-scale:.5;pointer-events:none}
+#tv-preview{position:absolute;left:0;top:0;width:960px;height:540px;border:0;transform:scale(var(--preview-scale));transform-origin:top left;pointer-events:none}
+#tv-sender-name{font-weight:600;color:var(--text);margin:16px 0 20px;overflow-wrap:anywhere}
+.tv-preview #clock-tv{display:none!important}
+#tv-approve:focus-visible,#tv-reject:focus-visible{outline:3px solid var(--accent);outline-offset:4px}
+
+
+/* Use the same shared button treatment as focus view, with receiver idle chrome. */
+.tv-controls{top:max(12px,env(safe-area-inset-top));right:max(12px,env(safe-area-inset-right));transition:opacity .2s ease}
+.tv-controls[data-idle]{opacity:0;visibility:hidden;pointer-events:none}
+.tv-controls>button{box-shadow:0 4px 18px #0002}
+@media(prefers-reduced-motion:reduce){.tv-controls{transition:none}}
+
+
+/* The shared focus header must never leak into receiver pairing or preview.
+   Active streams use their own auto-hiding controls instead. */
+body.tv-receiver.focus-view .site-shell>.site-header:has(.header-focus-actions){display:none!important}

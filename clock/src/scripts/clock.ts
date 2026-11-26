@@ -1,4 +1,4 @@
-import {createClockTv,type TvSnapshot} from './tv';
+import {createClockTv,senderDeviceName,type TvSnapshot} from './tv';
 import {createViewControls} from './view-controls';
 import {createDialControls} from './dial-controls';
 import {createBinaryClock} from './binary-clock';
@@ -157,11 +157,11 @@ enhanceClockSelects(form);
 
 createClockTv({snapshot(){
  const {awake,...display}=settings;const root=document.documentElement;
- return {version:1,settings:{...display,zone:settings.zone==='local'?Intl.DateTimeFormat().resolvedOptions().timeZone:settings.zone},appearance:{palette:root.dataset.palette||'green',style:root.dataset.style||'technical',theme:root.dataset.theme||'light',fontSize:root.dataset.fontSize||'0'},language:root.lang};
+ return {version:1,settings:{...display,zone:settings.zone==='local'?Intl.DateTimeFormat().resolvedOptions().timeZone:settings.zone},appearance:{palette:root.dataset.palette||'green',style:root.dataset.style||'technical',theme:root.dataset.theme||'light',fontSize:root.dataset.fontSize||'0'},language:root.lang,senderName:senderDeviceName()};
 },apply(snapshot:TvSnapshot){
  if(!isReceiver)return;
  const root=document.documentElement;root.lang=snapshot.language;
  root.dataset.palette=snapshot.appearance.palette;root.dataset.style=snapshot.appearance.style;root.dataset.themeMode=snapshot.appearance.theme;root.dataset.theme=snapshot.appearance.theme;root.dataset.fontSize=snapshot.appearance.fontSize;
  for(const key of Object.keys(defaults))if(key!=='awake'&&key in snapshot.settings){Object.assign(settings,{[key]:snapshot.settings[key]});const input=field(key);if(input.type==='checkbox')(input as HTMLInputElement).checked=Boolean(snapshot.settings[key]);else{const value=String(snapshot.settings[key]);if(key==='zone'&&input instanceof HTMLSelectElement&&![...input.options].some(option=>option.value===value))input.add(new Option(value,value));input.value=value;}}
- settings.awake=true;configure();focus(true);
+ settings.awake=!(window.parent!==window&&new URLSearchParams(location.search).get('preview')==='1');configure();focus(true);
 }});
