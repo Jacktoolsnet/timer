@@ -18,8 +18,8 @@ test('receiver approval is compact, previews the real clock and rejection restor
  await expect(page.locator('#clock-focus')).toBeHidden();
  await expect(page.locator('#tv-controls')).toBeHidden();
  await expect(page.locator('#tv-fullscreen')).toBeHidden();
- await expect(page.locator('.tv-note')).toHaveCount(1);
- await expect(page.locator('.tv-note').first()).toBeVisible();
+ await expect(page.locator('.tv-note')).toHaveCount(0);
+ await expect(page.locator('#tv-validity')).toBeVisible();
  pending=true;
  await expect(page.locator('#tv-approve')).toBeVisible();
  await expect(page.locator('#tv-approve')).toBeFocused();
@@ -46,7 +46,7 @@ test('receiver approval is compact, previews the real clock and rejection restor
  await page.locator('#tv-reject').click();
  await expect(page.locator('#tv-code')).toHaveText('1234 5678');
  await expect(page.locator('#tv-qr')).toBeVisible();
- await expect(page.locator('.tv-note').first()).toBeVisible();
+ await expect(page.locator('#tv-validity')).toBeVisible();
  await expect(frame).not.toHaveAttribute('src',/.+/);
  expect(created).toBe(2);expect(errors).toEqual([]);
 });
@@ -95,4 +95,30 @@ for(const allowFullscreen of [true,false])test('receiver stream has only a stop 
  await expect(controls).toBeHidden();expect(await controls.evaluate(el=>(el as HTMLElement).inert)).toBe(false);
  expect(await page.evaluate(()=>document.fullscreenElement===null)).toBe(true);
  expect(await page.evaluate(()=>(window as any).fullscreenExits)).toBe(allowFullscreen?1:0);
+});
+
+test('pairing validity counts down, expires without displaying an old QR and resets for a new code',async({page})=>{
+ await page.clock.install();
+ let created=0;
+ await page.route('**/api/v1/tv/**',route=>{
+  if(route.request().url().endsWith('/receivers/')){
+   created++;return route.fulfill({json:{id:'test-'+created,receiverToken:'a'.repeat(64),pairToken:'b'.repeat(64),code:'12345678',pairSeconds:10}});
+  }
+  return route.fulfill({json:{state:'waiting',revision:0,acknowledged:0}});
+ });
+ await page.goto('/de/stream/');
+ await expect(page.locator('#tv-countdown')).toHaveText('00:10');
+ await expect(page.locator('#tv-validity-progress')).toHaveAttribute('max','10');
+ await expect(page.locator('#tv-validity-progress')).toHaveAttribute('value','10');
+ await page.clock.runFor(3000);
+ await expect(page.locator('#tv-countdown')).toHaveText('00:07');
+ await expect(page.locator('#tv-validity-progress')).toHaveAttribute('value','7');
+ await page.clock.fastForward(8000);
+ await expect(page.locator('#tv-validity-label')).toHaveText('Code abgelaufen');
+ await expect(page.locator('#tv-validity-progress')).toHaveAttribute('value','0');
+ await expect(page.locator('#tv-qr')).toBeHidden();await expect(page.locator('#tv-code')).toBeHidden();
+ await page.locator('#tv-retry').click();
+ await expect(page.locator('#tv-countdown')).toHaveText('00:10');
+ await expect(page.locator('#tv-validity-label')).toHaveText('Code gültig für');
+ await expect(page.locator('#tv-qr')).toBeVisible();expect(created).toBe(2);
 });

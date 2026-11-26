@@ -33,6 +33,7 @@ export function createClockTv(options:{snapshot:()=>TvSnapshot;apply:(snapshot:T
  const base=root.dataset.api!.replace(/\/$/,'');
  let session:{id:string;token:string}|undefined,revision=0,lastSent='',timer:number|undefined,busy=false,backoff=2000,running=false,qrSecret='';
  let pendingSnapshot:TvSnapshot|undefined,lastPreview='';
+ let validityTimer:number|undefined,refreshCountdown:(()=>void)|undefined;
  let keypad:ReturnType<typeof createTvKeypad>|undefined;
  let scanner:ReturnType<typeof createTvScanner>|undefined;
  const status=(value:string)=>{ $('tv-status').textContent=value;const live=document.getElementById('tv-live-status');if(live)live.textContent=value;};
@@ -44,7 +45,7 @@ export function createClockTv(options:{snapshot:()=>TvSnapshot;apply:(snapshot:T
   }finally{window.clearTimeout(abortTimer);}
  }
  function schedule(delay=2000){window.clearTimeout(timer);if(session)timer=window.setTimeout(()=>void poll(),delay);}
- function forget(){window.clearTimeout(timer);session=undefined;revision=0;lastSent='';}
+ function forget(){refreshCountdown=undefined;window.clearInterval(validityTimer);window.clearTimeout(timer);session=undefined;revision=0;lastSent='';}
  function clearPreview(){
   pendingSnapshot=undefined;lastPreview='';
   const frame=document.getElementById('tv-preview') as HTMLIFrameElement|null;
@@ -72,7 +73,8 @@ export function createClockTv(options:{snapshot:()=>TvSnapshot;apply:(snapshot:T
  async function poll(){
   if(busy){schedule();return;}if(!session)return;busy=true;
   try{
-   const state=await api<State>(session.id+'/'+(receiver?'receiver':'sender'));backoff=2000;
+   const currentSession=session;
+   const state=await api<State>(session.id+'/'+(receiver?'receiver':'sender'));if(session!==currentSession)return;backoff=2000;
    if(receiver){
     if(state.state==='pending'){
      $('tv-proposal').hidden=false;$('tv-approve').hidden=false;$('tv-reject').hidden=false;$('tv-qr').hidden=true;$('tv-code').hidden=true;
@@ -84,7 +86,7 @@ export function createClockTv(options:{snapshot:()=>TvSnapshot;apply:(snapshot:T
      sendPreview();status('');
      if(first) $('tv-approve').focus();
     }else if((state.state==='active'||state.state==='detached')&&state.snapshot){
-     if(revision<state.revision){clearPreview();options.apply(state.snapshot);running=true;showReceiver(true);revision=state.revision;}
+     if(revision<state.revision){refreshCountdown=undefined;window.clearInterval(validityTimer);clearPreview();options.apply(state.snapshot);running=true;showReceiver(true);revision=state.revision;}
      if(state.state==='active'&&state.acknowledged!==state.revision)await api(session.id+'/ack','POST',{revision:state.revision});
      status('');
      if(state.state==='detached'){forget();status(t.expired);return;}
@@ -100,7 +102,7 @@ export function createClockTv(options:{snapshot:()=>TvSnapshot;apply:(snapshot:T
    }
    schedule(receiver||!running?2000:4000);
   }catch(error){
-   if(error instanceof TvError&&[401,404,410].includes(error.status)){forget();status(t.expired);if(receiver){clearPreview();$('tv-proposal').hidden=true;$('tv-retry').hidden=false;if(!running){$('tv-qr').hidden=true;$('tv-code').hidden=true;$('tv-approve').hidden=true;$('tv-reject').hidden=true;}}else{setSenderConnected(false);}return;}
+   if(error instanceof TvError&&[401,404,410].includes(error.status)){forget();status(t.expired);if(receiver){clearPreview();$('tv-validity').hidden=true;$('tv-proposal').hidden=true;$('tv-retry').hidden=false;if(!running){$('tv-qr').hidden=true;$('tv-code').hidden=true;$('tv-approve').hidden=true;$('tv-reject').hidden=true;}}else{setSenderConnected(false);}return;}
    if(error instanceof TvError&&error.status===409){schedule();return;}
    status(t.offline);backoff=Math.min(backoff*2,30000);schedule(backoff);
   }finally{busy=false;}
@@ -108,19 +110,39 @@ export function createClockTv(options:{snapshot:()=>TvSnapshot;apply:(snapshot:T
  function setSenderConnected(connected:boolean){if(connected)scanner?.close();$('tv-pair-form').hidden=connected;$('tv-detach').hidden=!connected;if(!connected){qrSecret='';const input=$('tv-pair-code') as HTMLInputElement;input.required=true;input.parentElement!.hidden=false;$('tv-code-entry').hidden=false;keypad?.sync();}}
  async function action(button:HTMLButtonElement,work:()=>Promise<void>){if(busy)return;busy=true;button.disabled=true;try{await work();}catch(error){if(error instanceof TvError&&error.code==='invalid_pairing'&&!receiver)setSenderConnected(false);status(error instanceof TvError&&error.code==='invalid_pairing'?t.invalid:t.failed);}finally{busy=false;button.disabled=false;keypad?.sync();schedule();}}
  if(receiver){
+  function startCountdown(seconds:number,requestedAt:number){
+   const duration=Number.isFinite(seconds)&&seconds>0?Math.min(seconds,600):600;
+   const expiresAt=requestedAt+duration*1000;
+   const progress=$('tv-validity-progress') as HTMLProgressElement;
+   progress.max=duration;$('tv-validity').hidden=false;$('tv-validity-label').textContent=t.codeValidFor;
+   function update(){
+    const remaining=Math.max(0,Math.ceil((expiresAt-Date.now())/1000));
+    progress.value=remaining;
+    const time=String(Math.floor(remaining/60)).padStart(2,'0')+':'+String(remaining%60).padStart(2,'0');
+    $('tv-countdown').textContent=time;progress.setAttribute('aria-valuetext',time);
+    if(remaining===0){
+     forget();clearPreview();$('tv-validity-label').textContent=t.codeExpired;
+     $('tv-qr').hidden=true;$('tv-code').hidden=true;$('tv-proposal').hidden=true;
+     $('tv-approve').hidden=true;$('tv-reject').hidden=true;$('tv-retry').hidden=false;status('');
+    }
+   }
+   refreshCountdown=update;validityTimer=window.setInterval(update,1000);update();
+  }
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshCountdown?.();});
   async function start(){
-   clearPreview();forget();running=false;showReceiver(false);status('');$('tv-retry').hidden=true;$('tv-proposal').hidden=true;$('tv-approve').hidden=true;$('tv-reject').hidden=true;$('tv-qr').hidden=true;$('tv-code').hidden=false;$('tv-code').textContent='…';
+   clearPreview();forget();running=false;showReceiver(false);status('');$('tv-validity').hidden=true;$('tv-retry').hidden=true;$('tv-proposal').hidden=true;$('tv-approve').hidden=true;$('tv-reject').hidden=true;$('tv-qr').hidden=true;$('tv-code').hidden=false;$('tv-code').textContent='…';
    try{
-    const created=await api<{id:string;receiverToken:string;pairToken:string;code:string}>('receivers','POST',{},'');
+    const requestedAt=Date.now();
+    const created=await api<{id:string;receiverToken:string;pairToken:string;code:string;pairSeconds:number}>('receivers','POST',{},'');
     session={id:created.id,token:created.receiverToken};$('tv-code').textContent=created.code.replace(/(\d{4})(\d{4})/,'$1 $2');
     const link=new URL('/'+document.documentElement.lang+'/pair/',location.origin);link.hash='tv='+created.pairToken;
     try{await QRCode.toCanvas($('tv-qr') as HTMLCanvasElement,link.href,{width:208,margin:4,errorCorrectionLevel:'M'});$('tv-qr').hidden=false;}catch{/* Numeric code remains usable. */}
-    schedule();
+    startCountdown(created.pairSeconds,requestedAt);schedule();
    }catch{status(t.failed);$('tv-code').textContent='';$('tv-retry').hidden=false;}
   }
   $('tv-approve').addEventListener('click',event=>void action(event.currentTarget as HTMLButtonElement,async()=>{
    receiverControls?.requestFullscreen();
-   await api(session!.id+'/approve','POST',{});schedule(10);
+   await api(session!.id+'/approve','POST',{});refreshCountdown=undefined;window.clearInterval(validityTimer);schedule(10);
   }));
   async function stop(){
    if(session)await api(session.id+'/stop','POST',{});
@@ -160,5 +182,5 @@ export function createClockTv(options:{snapshot:()=>TvSnapshot;apply:(snapshot:T
   new MutationObserver(changed).observe(document.documentElement,{attributes:true,attributeFilter:['data-palette','data-style','data-font-size','data-theme']});
  }
  // Never persist capabilities, codes or snapshots. The receiver keeps rendering on network loss.
- window.addEventListener('pagehide',()=>{window.clearTimeout(timer);session=undefined;});
+ window.addEventListener('pagehide',()=>{window.clearInterval(validityTimer);window.clearTimeout(timer);session=undefined;});
 }

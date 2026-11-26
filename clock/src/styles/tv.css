@@ -71,3 +71,12 @@ body.tv-receiver.focus-view .site-shell>.site-header:has(.header-focus-actions){
 /* Keep the clock's regular focus/fullscreen header compact on every screen size. */
 body.focus-view .header-focus-actions>button>span{display:none}
 body.focus-view .header-focus-actions>button{width:44px;height:44px;padding:9px}
+
+
+.tv-validity{max-width:280px;margin:18px auto 4px;color:var(--muted);font-size:.82rem}
+.tv-validity>div{display:flex;justify-content:space-between;gap:16px;align-items:center;margin-bottom:9px}
+#tv-countdown{color:var(--accent);font-weight:650;font-variant-numeric:tabular-nums}
+#tv-validity-progress{display:block;width:100%;height:6px;border:0;border-radius:99px;overflow:hidden;background:var(--line);color:var(--accent);accent-color:var(--accent)}
+#tv-validity-progress::-webkit-progress-bar{background:var(--line);border-radius:99px}
+#tv-validity-progress::-webkit-progress-value{background:var(--accent);border-radius:99px}
+#tv-validity-progress::-moz-progress-bar{background:var(--accent);border-radius:99px}
