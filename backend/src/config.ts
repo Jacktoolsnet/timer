@@ -1,3 +1,4 @@
+import {certificateConfig} from './certificate-config.js';
 import {createHmac} from 'node:crypto';
 const digestTvSecret=(secret:string)=>createHmac('sha256',secret).update('tv-state-development').digest('hex');
 import type {PoolConfig} from 'pg';
@@ -55,7 +56,7 @@ export function loadConfig(env:Env){
  const tvSecret=env.TV_STATE_SECRET||(production?'':digestTvSecret(secret));
  if(production&&tvEnabled&&tvSecret===secret)throw new Error('Invalid TV_STATE_SECRET: use a separate key');
  if(tvEnabled&&(tvSecret.length<32||/replace|example|changeme/i.test(tvSecret)))throw new Error('Set a unique TV_STATE_SECRET (at least 32 characters)');
- return {tv:{enabled:tvEnabled,origins:tvOrigins,secret:tvSecret},production,host:env.HOST||(production?'0.0.0.0':'127.0.0.1'),port:number(env.PORT,4340,'PORT',1,65535),baseUrl:base.origin,
+ return {certificates:certificateConfig(env,[base.origin,...origins,...tvOrigins]),tv:{enabled:tvEnabled,origins:tvOrigins,secret:tvSecret},production,host:env.HOST||(production?'0.0.0.0':'127.0.0.1'),port:number(env.PORT,4340,'PORT',1,65535),baseUrl:base.origin,
   origins,secret,rootUsername,rootPassword,rootEmail,db:createDbConfigFromEnv(env),limits:databaseLimits(env),
   trustProxy:number(env.TRUST_PROXY,0,'TRUST_PROXY',0,10),
   sessionIdle:number(env.SESSION_IDLE_SECONDS,3600,'SESSION_IDLE_SECONDS',60,86400),

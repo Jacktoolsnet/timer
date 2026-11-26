@@ -1,7 +1,10 @@
+import {createCertificateAdmin} from './certificates';
+import {certificateText} from '../lib/certificate-text';
 import {createAdminToast} from './admin-toast';
 import type {adminText} from '../lib/admin-text';
 type User={id:string;username:string;displayName:string;email:string;role:'root'|'admin';active:boolean;mustChangePassword:boolean};
 const root=document.getElementById('jt-admin')!;
+const certText=certificateText[document.documentElement.lang as keyof typeof certificateText];
 const t=JSON.parse(root.dataset.text!) as typeof adminText.en;
 const $=(id:string)=>document.getElementById(id)!;
 const form=(id:string)=>$(id) as HTMLFormElement;
@@ -14,11 +17,11 @@ const deleteDialog=$('admin-delete-dialog') as HTMLDialogElement;
 const blockDialog=$('admin-block-dialog') as HTMLDialogElement;
 const toast=createAdminToast($('admin-toast'),$('admin-status'),$('admin-toast-close') as HTMLButtonElement);
 class RequestError extends Error{constructor(public code:string){super(code);}}
-function message(error:unknown){return error instanceof RequestError?(error.code==='backend_unavailable'?t.unavailable:t.errors[error.code as keyof typeof t.errors]||t.errors.internal_error):t.unavailable;}
+function message(error:unknown){if(error instanceof RequestError&&error.code in certText.errors)return certText.errors[error.code as keyof typeof certText.errors];return error instanceof RequestError?(error.code==='backend_unavailable'?t.unavailable:t.errors[error.code as keyof typeof t.errors]||t.errors.internal_error):t.unavailable;}
 function status(text:string,error=false){toast.show(text,error);}
-function signedOut(){$('admin-header-session').hidden=true;$('admin-identity').textContent='';$('admin-role').textContent='';root.dataset.state='signed-out';csrf='';user=null;$('admin-login-panel').hidden=false;$('admin-workspace').hidden=true;$('admin-users').replaceChildren();dialog.close();createDialog.close();deleteDialog.close();blockDialog.close();root.querySelectorAll<HTMLInputElement>('input[type=password]').forEach(input=>input.value='');}
+function signedOut(){certificates.reset();$('admin-header-session').hidden=true;$('admin-identity').textContent='';$('admin-role').textContent='';root.dataset.state='signed-out';csrf='';user=null;$('admin-login-panel').hidden=false;$('admin-workspace').hidden=true;$('admin-users').replaceChildren();dialog.close();createDialog.close();deleteDialog.close();blockDialog.close();root.querySelectorAll<HTMLInputElement>('input[type=password]').forEach(input=>input.value='');}
 async function api<T=Record<string,never>>(path:string,method='GET',body?:unknown,establishingSession=false):Promise<T>{
- const response=await fetch(base+'/api/v1/'+path,{method,credentials:'include',cache:'no-store',signal:AbortSignal.timeout(15000),headers:{...(method==='GET'?{}:{'Content-Type':'application/json','X-CSRF-Token':csrf})},...(body===undefined?{}:{body:JSON.stringify(body)})});
+ const response=await fetch(base+'/api/v1/'+path,{method,credentials:'include',cache:'no-store',signal:AbortSignal.timeout(path==='admin/certificates/test-email'?60000:15000),headers:{...(method==='GET'?{}:{'Content-Type':'application/json','X-CSRF-Token':csrf})},...(body===undefined?{}:{body:JSON.stringify(body)})});
  if(!response.ok){
   const value=await response.json().catch(()=>({error:response.status>=500?'backend_unavailable':'internal_error'}));
   let code=value.error||'internal_error';
@@ -39,6 +42,9 @@ function showUser(next:User){
  $('admin-profile-page').hidden=view!=='profile';
  $('admin-back').hidden=view==='overview'||next.mustChangePassword;
  $('admin-users-tile').hidden=!canManage;
+ $('admin-certificates-panel').hidden=view!=='certificates';
+ $('admin-certificates-tile').hidden=next.mustChangePassword;
+ $('cert-test-mail').hidden=next.role!=='root';
  $('admin-users-panel').hidden=view!=='users'||!canManage;
  field('admin-profile-form','displayName').value=next.displayName;field('admin-profile-form','email').value=next.email;
 }
@@ -69,7 +75,7 @@ async function users(){
    const actions=document.createElement('div');actions.className='admin-user-actions';
    actions.append(button(account.active?t.disable:t.enable,account.active?'block':'enable',()=>{
     if(account.active){blockId=account.id;toast.hide();$('admin-block-username').textContent=account.username;blockDialog.showModal();return;}
-    void perform(async()=>{await api('admin/users/'+account.id,'PATCH',{active:true});await users();status(t.saved);});
+    void perform(async()=>{await api('admin/users/'+account.id,'PATCH',{active:true});await users();await certificates.load();status(t.saved);});
    }),button(t.reset,'reset',()=>{
     resetId=account.id;toast.hide();form('admin-reset-form').reset();$('admin-reset-username').textContent=account.username;dialog.showModal();
    }),button(t.deleteAccount,'delete',()=>{
@@ -83,27 +89,28 @@ async function perform(work:()=>Promise<void>){
  if(busy)return;busy=true;root.setAttribute('aria-busy','true');($('admin-logout') as HTMLButtonElement).disabled=true;
  root.querySelectorAll<HTMLButtonElement>('button').forEach(b=>{if(b.id!=='admin-toast-close')b.disabled=true;});
  try{await work();}catch(error){status(message(error),true);}
- finally{busy=false;($('admin-logout') as HTMLButtonElement).disabled=false;root.removeAttribute('aria-busy');root.querySelectorAll<HTMLButtonElement>('button').forEach(b=>b.disabled=false);}
+ finally{busy=false;($('admin-logout') as HTMLButtonElement).disabled=false;root.removeAttribute('aria-busy');root.querySelectorAll<HTMLButtonElement>('button').forEach(b=>b.disabled=false);certificates.refreshButtons();}
 }
+const certificates=createCertificateAdmin({api,perform,status,failure:message});
 form('admin-login-form').addEventListener('submit',event=>{event.preventDefault();void perform(async()=>{
  const value=await api<{user:User;csrfToken:string}>('auth/login','POST',{username:field('admin-login-form','username').value,password:field('admin-login-form','password').value});
  field('admin-login-form','password').value='';csrf=value.csrfToken;
  // A successful password check is not enough: verify that the browser retained its cookie.
  const verified=await api<{user:User;csrfToken:string}>('auth/me','GET',undefined,true);
- csrf=verified.csrfToken;showUser(verified.user);await users();status(verified.user.mustChangePassword?t.required:t.signedIn);
+ csrf=verified.csrfToken;showUser(verified.user);await users();await certificates.load();status(verified.user.mustChangePassword?t.required:t.signedIn);
 });});
 $('admin-logout').addEventListener('click',()=>void perform(async()=>{await api('auth/logout','POST',{});signedOut();field('admin-login-form','username').focus();status(t.signedOut);}));
 form('admin-profile-form').addEventListener('submit',event=>{event.preventDefault();void perform(async()=>{
- const value=await api<{user:User}>('auth/profile','PATCH',{displayName:field('admin-profile-form','displayName').value,email:field('admin-profile-form','email').value});showUser(value.user);status(t.saved);await users();
+ const value=await api<{user:User}>('auth/profile','PATCH',{displayName:field('admin-profile-form','displayName').value,email:field('admin-profile-form','email').value});showUser(value.user);status(t.saved);await users();await certificates.load();
 });});
 form('admin-password-form').addEventListener('submit',event=>{event.preventDefault();void perform(async()=>{
  await api('auth/password','PUT',{currentPassword:field('admin-password-form','currentPassword').value,newPassword:field('admin-password-form','newPassword').value});form('admin-password-form').reset();signedOut();status(t.passwordChanged);
 });});
 form('admin-create-form').addEventListener('submit',event=>{event.preventDefault();void perform(async()=>{
- await api('admin/users','POST',Object.fromEntries(new FormData(form('admin-create-form'))));createDialog.close();form('admin-create-form').reset();await users();status(t.created);
+ await api('admin/users','POST',Object.fromEntries(new FormData(form('admin-create-form'))));createDialog.close();form('admin-create-form').reset();await users();await certificates.load();status(t.created);
 });});
 form('admin-reset-form').addEventListener('submit',event=>{event.preventDefault();void perform(async()=>{
- await api('admin/users/'+resetId+'/password','POST',{password:field('admin-reset-form','password').value});form('admin-reset-form').reset();dialog.close();status(t.saved);await users();
+ await api('admin/users/'+resetId+'/password','POST',{password:field('admin-reset-form','password').value});form('admin-reset-form').reset();dialog.close();status(t.saved);await users();await certificates.load();
 });});
 [dialog,createDialog,deleteDialog,blockDialog].forEach(modal=>modal.addEventListener('cancel',event=>{if(busy)event.preventDefault();}));
 $('admin-create-open').addEventListener('click',()=>{toast.hide();form('admin-create-form').reset();createDialog.showModal();});
@@ -111,17 +118,17 @@ $('admin-create-cancel').addEventListener('click',()=>createDialog.close());
 createDialog.addEventListener('close',()=>form('admin-create-form').reset());
 $('admin-block-cancel').addEventListener('click',()=>blockDialog.close());
 $('admin-block-confirm').addEventListener('click',()=>void perform(async()=>{
- await api('admin/users/'+blockId,'PATCH',{active:false});blockDialog.close();await users();$('admin-create-open').focus();status(t.saved);
+ await api('admin/users/'+blockId,'PATCH',{active:false});blockDialog.close();await users();await certificates.load();$('admin-create-open').focus();status(t.saved);
 }));
 blockDialog.addEventListener('close',()=>{blockId='';$('admin-block-username').textContent='';});
 $('admin-delete-cancel').addEventListener('click',()=>deleteDialog.close());
 $('admin-delete-confirm').addEventListener('click',()=>void perform(async()=>{
- await api('admin/users/'+deleteId,'DELETE',{});deleteDialog.close();await users();$('admin-create-open').focus();status(t.deleted);
+ await api('admin/users/'+deleteId,'DELETE',{});deleteDialog.close();await users();await certificates.load();$('admin-create-open').focus();status(t.deleted);
 }));
 deleteDialog.addEventListener('close',()=>{deleteId='';$('admin-delete-username').textContent='';});
 $('admin-reset-cancel').addEventListener('click',()=>dialog.close());
 dialog.addEventListener('close',()=>form('admin-reset-form').reset());
 void perform(async()=>{
- try{const value=await api<{user:User;csrfToken:string}>('auth/me');csrf=value.csrfToken;showUser(value.user);status('');await users();}
+ try{const value=await api<{user:User;csrfToken:string}>('auth/me');csrf=value.csrfToken;showUser(value.user);status('');await users();await certificates.load();}
  catch(error){if(error instanceof RequestError&&error.code==='sign_in_required'){signedOut();status('');}else throw error;}
 });

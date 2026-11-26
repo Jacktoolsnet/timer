@@ -1,3 +1,4 @@
+import {createCertificateMonitor,type CertificateMonitor} from './certificate-monitor.js';
 import {tvRouter} from './tv.js';
 import express,{type ErrorRequestHandler,type RequestHandler} from 'express';
 import helmet from 'helmet';
@@ -8,7 +9,7 @@ import {Database,BusyError} from './database.js';
 import {hashPassword,verifyPassword,token,digest,equal} from './security.js';
 import {ApiError,object,text,username,password,email,id,publicUser,auth,type UserRow} from './http.js';
 
-export async function createApp(config:Config,db:Database){
+export async function createApp(config:Config,db:Database,certificates:CertificateMonitor=createCertificateMonitor(config.certificates,db)){
  const app=express();app.disable('x-powered-by');app.set('trust proxy',config.trustProxy);
  app.use(helmet());
  const cookieName=config.production?'__Host-jt_admin':'jt_admin_dev';
@@ -61,6 +62,19 @@ export async function createApp(config:Config,db:Database){
    expires_at=CASE WHEN jt_rate_limits.expires_at<=now() THEN now()+interval '15 minutes' ELSE jt_rate_limits.expires_at END RETURNING hits`,[digest(config.secret,'rate:'+key)]);
   if(result.rows[0].hits>limit)throw new ApiError(429,'login_limited');
  }
+ const certificateAccess:RequestHandler=(_req,res,next)=>{
+  if(auth(res).user.must_change_password)throw new ApiError(403,'password_change_required');next();
+ };
+ app.get('/api/v1/admin/certificates',requireAuth,certificateAccess,async(_req,res)=>res.json(await certificates.overview()));
+ app.post('/api/v1/admin/certificates/check',requireAuth,csrf,certificateAccess,async(req,res)=>{
+  object(req.body,[]);await certificates.launch('manual');
+  await db.query("INSERT INTO jt_audit_events(actor_id,action) VALUES($1,'certificate_check_requested')",[auth(res).user.id]);
+  res.status(202).json({started:true});
+ });
+ app.post('/api/v1/admin/certificates/test-email',requireAuth,csrf,root,async(req,res)=>{
+  object(req.body,[]);await certificates.testEmail();
+  await db.query("INSERT INTO jt_audit_events(actor_id,action) VALUES($1,'certificate_test_email_sent')",[auth(res).user.id]);res.status(204).end();
+ });
  app.post('/api/v1/auth/login',async(req,res)=>{
   const body=object(req.body,['username','password']);const name=username(body.username);const pass=text(body.password,1,128);
   await rateLimit('ip:'+req.ip,config.loginLimit*3);await rateLimit('username:'+name,config.loginLimit);

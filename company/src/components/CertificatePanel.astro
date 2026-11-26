@@ -1,0 +1,23 @@
+---
+import {certificateText} from '../lib/certificate-text';
+import type {Language} from '../lib/i18n';
+const {lang}=Astro.props as {lang:Language};const t=certificateText[lang];
+---
+<section id="admin-certificates-panel" data-text={JSON.stringify(t)} hidden>
+ <section class="admin-card">
+  <div class="admin-list-heading"><h2>{t.title}</h2><div class="admin-user-actions">
+   <button id="cert-check" class="primary admin-icon-button" type="button" aria-label={t.check} data-tooltip={t.check}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10a9 9 0 1 1 2 8M3 4v6h6"/><path d="M12 7v5l3 2"/></svg></button>
+   <button id="cert-test-mail" class="secondary admin-icon-button" type="button" aria-label={t.testMail} data-tooltip={t.testMail} hidden><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="m3 7 9 6 9-6"/></svg></button>
+  </div></div>
+  <p id="cert-disabled" class="admin-warning" hidden>{t.disabled}</p>
+  <p id="cert-running" class="cert-running" role="status" hidden>{t.running}</p>
+  <div id="cert-summary" class="cert-summary"></div>
+  <div id="cert-list" class="cert-list"></div>
+ </section>
+ <details class="admin-card cert-configuration"><summary>{t.configuration}</summary><dl id="cert-configuration"></dl><p class="admin-hint">{t.setup}</p></details>
+ <dialog id="cert-detail-dialog" aria-labelledby="cert-detail-title"><div class="dialog-inner">
+  <span class="admin-dialog-symbol" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m12 3 8 3v6c0 4-3 7-8 9-5-2-8-5-8-9V6l8-3Z"/><path d="m8.5 12 2.5 2.5 4.5-5"/></svg></span>
+  <h2 id="cert-detail-title">{t.details}</h2><p id="cert-detail-host" class="cert-detail-host"></p><dl id="cert-details"></dl>
+  <div class="dialog-actions"><button id="cert-detail-close" class="secondary" type="button" autofocus>{t.close}</button></div>
+ </div></dialog>
+</section>

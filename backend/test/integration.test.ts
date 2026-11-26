@@ -1,3 +1,7 @@
+import {createCertificateMonitor} from '../src/certificate-monitor.js';
+import {parseCertificateTarget} from '../src/certificate-config.js';
+import {emptyCertificate,type CertificateStatus} from '../src/certificate-probe.js';
+import type {CertificateMail} from '../src/certificate-mail.js';
 import {test,before,after} from 'node:test';
 import assert from 'node:assert/strict';
 import type {Server} from 'node:http';
@@ -11,6 +15,12 @@ if(!url||!new URL(url).pathname.endsWith('_test'))throw new Error('TEST_DATABASE
 const origin='http://127.0.0.1:4321';
 const config=loadConfig({ADMIN_DATABASE_URL:url,ROOT_USERNAME:'root',ROOT_PASSWORD:'test-only-root-password!',SESSION_SECRET:'test-only-integration-session-secret-12345',ADMIN_ALLOWED_ORIGINS:origin,LOGIN_LIMIT:'100'});
 const db=new Database(config);let server:Server,base:string;
+let certificateStatus:CertificateStatus='warning',mailFails=false,probeGate:Promise<void>|undefined;
+const mailMessages:CertificateMail[]=[];
+const certificates=createCertificateMonitor(config.certificates,db,{
+ inspect:async target=>{await probeGate;return {...emptyCertificate(target),status:certificateStatus,lastCheckedAt:new Date().toISOString(),validFrom:'2026-01-01T00:00:00Z',validTo:'2027-01-01T00:00:00Z',daysRemaining:20};},
+ send:async(_config,message)=>{if(mailFails)throw Error('test SMTP failure');mailMessages.push(message);}
+});
 type Identity={user:{id:string;username:string;role:string;mustChangePassword:boolean};csrfToken:string};
 type Login={cookie:string;data:Identity};
 async function request(path:string,method='GET',body?:unknown,login?:Login,headers:Record<string,string>={}){
@@ -26,10 +36,10 @@ before(async()=>{
  if(existing.rows[0].name)throw new Error('Refusing to run integration tests against existing JackTools tables');
  await Promise.all([migrate(db),migrate(db)]);
  const created=await Promise.all([bootstrapRoot(db,config),bootstrapRoot(db,config)]);assert.equal(created.filter(Boolean).length,1);
- const app=await createApp(config,db);server=app.listen(0,'127.0.0.1');await new Promise<void>(resolve=>server.once('listening',resolve));
+ const app=await createApp(config,db,certificates);server=app.listen(0,'127.0.0.1');await new Promise<void>(resolve=>server.once('listening',resolve));
  const address=server.address();if(!address||typeof address==='string')throw new Error('Missing test listener');base=`http://127.0.0.1:${address.port}`;
 });
-after(async()=>{if(server)await new Promise<void>(resolve=>server.close(()=>resolve()));await db.close();});
+after(async()=>{await certificates.close();if(server)await new Promise<void>(resolve=>server.close(()=>resolve()));await db.close();});
 test('root authentication, origins, CSRF, sessions and reset',async()=>{
  assert.equal((await fetch(base+'/health/live')).status,200);assert.equal((await fetch(base+'/health/ready')).status,200);
  assert.equal((await request('admin/users')).status,401);
@@ -195,4 +205,52 @@ test('TV pairing is receiver-approved, scoped, encrypted, revisioned, expiring a
 
 test('real TV browsers pair, confirm, synchronize and keep ticking without the phone', {skip:process.env.TV_BROWSER_TESTS!=='1',timeout:120000},async()=>{
  const {tvBrowserTest}=await import('./tv-browser.js');await tvBrowserTest(base,config);
+});
+
+test('certificate admin is authenticated, CSRF protected and independent; leases, mail retries and recoveries persist',async()=>{
+ assert.equal((await request('admin/certificates')).status,401);
+ const root=await login();
+ let response=await request('admin/certificates','GET',undefined,root);
+ assert.equal(response.status,200);assert.equal((await response.json()).configuration.enabled,false);
+ assert.equal((await request('admin/certificates/check','POST',{},root)).status,409);
+ assert.equal((await request('admin/certificates/check','POST',{url:'https://evil.example.test'},root)).status,400);
+ config.certificates.enabled=true;config.certificates.targets=[parseCertificateTarget('JackTools|cert.example.test')];
+ config.certificates.mail={host:'smtp.example.test',port:465,secure:true,user:'support@example.test',pass:'test-SMTP-secret-must-never-leak',from:'support@example.test'};
+ config.certificates.recipient='alerts@example.test';
+ assert.equal((await request('admin/certificates/check','POST',{},root,{'X-CSRF-Token':''})).status,403);
+ const created=await request('admin/users','POST',{username:'certadmin',password:'test-cert-temp-password!'},root);assert.equal(created.status,201);
+ let admin=await login('certadmin','test-cert-temp-password!');
+ assert.equal((await request('admin/certificates','GET',undefined,admin)).status,403);
+ await request('auth/password','PUT',{currentPassword:'test-cert-temp-password!',newPassword:'test-cert-new-password!'},admin);
+ admin=await login('certadmin','test-cert-new-password!');
+ assert.equal((await request('admin/certificates/test-email','POST',{},admin)).status,403);
+ let release!:()=>void;probeGate=new Promise(resolve=>{release=resolve;});
+ assert.equal((await request('admin/certificates/check','POST',{},admin)).status,202);
+ assert.equal((await request('admin/certificates/check','POST',{},root)).status,409);
+ const other=createCertificateMonitor(config.certificates,db);
+ await assert.rejects(other.launch(),/certificates_running/);await other.close();
+ release();probeGate=undefined;
+ async function done(){for(let i=0;i<100;i++){if(!(await certificates.overview()).monitor.running)return;await new Promise(resolve=>setTimeout(resolve,20));}assert.fail('monitor did not finish');}
+ async function next(){await db.query("UPDATE jt_certificate_monitor SET last_started_at=now()-interval '2 minutes' WHERE id=true");await certificates.run('test');}
+ await done();assert.equal(mailMessages.length,1);
+ assert.equal((await request('admin/certificates/check','POST',{},root)).status,429);
+ await next();assert.equal(mailMessages.length,1,'unchanged status must not resend');
+ certificateStatus='critical';mailFails=true;await next();
+ assert.equal((await certificates.overview()).monitor.lastMailError,'mail_failed');assert.equal(mailMessages.length,1);
+ mailFails=false;await next();assert.equal(mailMessages.length,2,'failed mail retries on the next check');
+ certificateStatus='ok';await next();assert.equal(mailMessages.length,3,'recovery mail');
+ await next();assert.equal(mailMessages.length,3);
+ response=await request('admin/certificates','GET',undefined,root);const text=await response.text();
+ assert.ok(!text.includes('test-SMTP-secret'));assert.ok(!text.includes('password'));assert.ok(!text.includes('smtp.example.test'));
+ assert.equal((await request('admin/certificates/test-email','POST',{to:'evil@example.test'},root)).status,400);
+ assert.equal((await request('admin/certificates/test-email','POST',{},root)).status,204);assert.equal(mailMessages.length,4);
+ assert.equal((await request('admin/certificates/test-email','POST',{},root)).status,429);
+ assert.equal((await db.query("SELECT count(*) AS n FROM jt_audit_events WHERE action='certificate_test_email_sent'")).rows[0].n,'1');
+ await db.query("UPDATE jt_certificate_monitor SET last_test_at=now()-interval '2 minutes' WHERE id=true");
+ mailFails=true;assert.equal((await request('admin/certificates/test-email','POST',{},root)).status,502);assert.equal((await certificates.overview()).monitor.lastMailError,'mail_failed');mailFails=false;
+ await db.query("UPDATE jt_certificate_monitor SET last_started_at=now()-interval '2 minutes' WHERE id=true");
+ certificateStatus='warning';config.certificates.schedule='0 0 1 1 *';certificates.startScheduler();certificates.startScheduler();
+ for(let i=0;i<100&&mailMessages.length<5;i++)await new Promise(resolve=>setTimeout(resolve,20));
+ await done();assert.equal(mailMessages.length,5,'startup check runs without a public HTTP cron endpoint');
+ assert.ok((await certificates.overview()).monitor.nextRunAt);
 });

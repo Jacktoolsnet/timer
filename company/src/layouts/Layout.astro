@@ -14,7 +14,7 @@ import { colorSchemes } from '../lib/appearance';
 import { languages, languageNames, type Language } from '../lib/i18n';
 import { getCompanyDictionary } from '../lib/company-ui';
 import {getBlogPath,type BlogKey} from '../lib/blog';
-interface Props { adminView?:'overview'|'profile'|'users'; blogKey?:BlogKey|'index'; lang: Language; title: string; description: string; route: string; noindex?: boolean; legal?: boolean; homeAlternates?: boolean; canonicalPath?:string; socialImageProject?:SocialProject; guideSlug?:string; quietBackground?:boolean; ogType?:'website'|'article' }
+interface Props { adminView?:'overview'|'profile'|'users'|'certificates'; blogKey?:BlogKey|'index'; lang: Language; title: string; description: string; route: string; noindex?: boolean; legal?: boolean; homeAlternates?: boolean; canonicalPath?:string; socialImageProject?:SocialProject; guideSlug?:string; quietBackground?:boolean; ogType?:'website'|'article' }
 const { lang, title, description, noindex = false, legal = false, homeAlternates = true } = Astro.props;
 const t = getCompanyDictionary(lang);
 const motion = backgroundCopy[lang];

@@ -110,3 +110,31 @@
 #admin-create-dialog,#admin-delete-dialog,#admin-block-dialog { max-height:calc(100dvh - 32px); overflow:auto; }
 #admin-create-form>.dialog-actions { grid-column:1/-1; }
 @media(prefers-reduced-motion:reduce) { .admin-icon-button::after { transition:none; } }
+
+.cert-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:20px 0}
+.cert-summary>div{display:grid;gap:6px;padding:18px;border:1px solid var(--line);border-radius:16px;background:var(--bg)}
+.cert-summary strong{font-size:1.8rem;color:var(--accent);font-variant-numeric:tabular-nums}
+.cert-summary span{font-size:.78rem;color:var(--muted)}
+.cert-list{display:grid;gap:10px}
+.jt-admin .cert-row{display:flex;justify-content:space-between;align-items:center;gap:20px;width:100%;padding:18px;border:1px solid var(--line);border-radius:15px;background:var(--bg);color:var(--text);text-align:left}
+.cert-row:hover{border-color:var(--accent)}
+.cert-row>span{display:grid;gap:7px;min-width:0;overflow-wrap:anywhere}
+.cert-row small{color:var(--muted);font-size:.78rem}
+.cert-row-meta{justify-items:end;flex-shrink:0}
+.cert-badge{display:inline-flex;align-items:center;gap:6px;border-radius:99px;padding:5px 10px;font-size:.75rem;background:var(--accent-soft);color:var(--accent);border:1px solid var(--line)}
+.cert-badge:before{content:'';width:6px;height:6px;background:currentColor;border-radius:50%}
+.cert-badge[data-status=error],.cert-badge[data-status=expired],.cert-badge[data-status=critical]{color:#c94444;background:color-mix(in srgb,#c94444 10%,var(--surface))}
+.cert-badge[data-status=warning]{color:light-dark(#986014,#f4bd65);background:color-mix(in srgb,#d99427 12%,var(--surface))}
+.cert-badge[data-status=unchecked]{color:var(--muted);background:var(--surface)}
+.cert-configuration summary{font-weight:600;cursor:pointer;padding:4px 0}
+.cert-configuration dl,#cert-details{display:grid;grid-template-columns:minmax(120px,.7fr) minmax(0,1.3fr);gap:12px 20px;font-size:.85rem;line-height:1.6}
+.cert-configuration dt,#cert-details dt{color:var(--muted)}
+.cert-configuration dd,#cert-details dd{margin:0;overflow-wrap:anywhere}
+#cert-detail-dialog{width:min(640px,calc(100vw - 32px));max-height:calc(100dvh - 32px);overflow:auto}
+.cert-detail-host{color:var(--accent);font-family:ui-monospace,monospace;overflow-wrap:anywhere}
+.cert-running{color:var(--accent);font-size:.9rem}
+@media(max-width:600px){.cert-summary{grid-template-columns:repeat(2,minmax(0,1fr))}.jt-admin .cert-row{gap:10px;padding:14px}.cert-configuration dl,#cert-details{grid-template-columns:minmax(0,1fr);gap:4px}.cert-configuration dd,#cert-details dd{margin-bottom:12px}.cert-row-meta{flex-shrink:1}}
+@media(max-width:600px){
+ .jt-admin .cert-row{align-items:stretch;flex-direction:column}
+ .cert-row>.cert-row-meta{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+}

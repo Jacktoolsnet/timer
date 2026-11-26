@@ -391,7 +391,11 @@ im eigenständigen Projekt `../backend/`. Die Company-Seite bleibt statisch.
 
 Nach Anmeldung zeigt die Admin-Startseite eine Kachelübersicht. `/{lang}/admin/profile/`
 enthält Profil und Passwortänderung, `/{lang}/admin/users/` die Benutzerverwaltung
-(nur Root). Jede Unterseite prüft die Sitzung erneut; Backend-Rollenprüfungen bleiben
+(nur Root). Die Kachel Zertifikatsprüfung führt zu /{lang}/admin/certificates/:
+Statusübersicht, Zertifikatsdetails im Overlay, manuelle Hintergrundprüfung und
+Root-Testmail. Domains, Zeitplan und SMTP bleiben in der Backend-Umgebung
+(siehe ../backend/README.md, Abschnitt Zertifikatsüberwachung).
+Jede Unterseite prüft die Sitzung erneut; Backend-Rollenprüfungen bleiben
 maßgeblich. Ein erforderlicher Passwortwechsel hat Vorrang vor der Übersicht.
 In der Benutzerverwaltung öffnet der Plus-Button die Anlegemaske als modales Overlay.
 Iconbuttons bieten Sperren/Entsperren, Passwortreset und Löschen mit beschrifteten

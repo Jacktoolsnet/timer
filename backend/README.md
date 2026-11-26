@@ -386,3 +386,129 @@ Regressionen: `npm test`, `npm run test:local`. Vollständiger Browserablauf mit
 echtem Express, isolierter Astro-Instanz und wegwerfbarer PostgreSQL-Datenbank:
 `TV_BROWSER_TESTS=1 npm run test:local` (benötigt installierte Clock-Abhängigkeiten
 und Playwright Chromium). Keine produktiven Zugangsdaten oder Tabellen werden benutzt.
+
+## Zertifikatsüberwachung
+
+Eigenständige JackTools-Implementierung der Funktion aus dem MessageDrop-Adminbackend:
+keine Verbindung zu dessen Datenbank, Nutzern, SMTP-Zugang oder API. Domains werden
+per TLS-Handshake mit SNI geprüft: Gültigkeitsbeginn/-ende, Resttage,
+Vertrauenskette und Hostname. Auch abgelaufene/selbstsignierte Zertifikate werden
+ausgelesen, aber **nicht** als vertrauenswürdig eingestuft.
+
+### Einrichtung
+
+1. npm ci, npm run migrate (neue additive Migration 003_certificates.sql),
+   danach npm run build und Backend neu starten. Lokal: npm run migrate:local.
+2. Company neu bauen und deployen. Im Admin-Dashboard erscheint die Kachel
+   **Zertifikatsprüfung**, erreichbar unter /{de,en,es,fr}/admin/certificates/.
+3. In der Backend-Umgebung aktivieren und eigene Domains ergänzen:
+
+       CERT_MONITOR_ENABLED=true
+       CERT_MONITOR_SCHEDULER_ENABLED=true
+       CERT_MONITOR_CRON=40 0 * * *
+       CERT_MONITOR_TIMEZONE=Europe/Berlin
+       CERT_MONITOR_WARNING_DAYS=30
+       CERT_MONITOR_CRITICAL_DAYS=14
+       CERT_MONITOR_DOMAINS=Company|jacktools.net;Backend|backend.jacktools.net;Clock|clock.jacktools.net
+       CERT_MONITOR_DOMAINS_TOOLS=Metronom|metronome.jacktools.net
+
+   Domainnamen an die tatsächlich betriebenen URLs anpassen. Automatisch kommen
+   HTTPS-Origins aus PUBLIC_BASE_URL, ADMIN_ALLOWED_ORIGINS und TV_ALLOWED_ORIGINS
+   hinzu. CERT_MONITOR_DOMAINS, beliebige nummerierte/benannte
+   CERT_MONITOR_DOMAINS_*-Listen sowie optional CERT_MONITOR_DOMAINS_FILE werden
+   zusammengeführt und nach Host/Port dedupliziert. Format: Name|domain.tld,
+   Name=https://domain.tld oder domain.tld[:port]. Dateiliste maximal 64 KiB,
+   insgesamt maximal 50 Ziele. Ungültige Eingaben verhindern den Start.
+   Die Domains werden in dieser ersten Version wie bei MessageDrop **über die
+   Umgebung**, nicht über frei eingebbare Admin-URLs, verwaltet.
+   Änderungen benötigen einen Backend-Neustart.
+
+4. Postfach support@jacktools.net beim Mailanbieter anlegen. Dessen echte
+   SMTP-Daten in der Umgebung hinterlegen:
+
+       MAIL_SERVER_SMTP=<SMTP-Server des Anbieters>
+       MAIL_PORT_SMTP=465
+       MAIL_SECURE=true
+       MAIL_USER=support@jacktools.net
+       MAIL_PASSWORD=<Passwort des Postfachs>
+       MAIL_FROM=support@jacktools.net
+       CERT_MONITOR_NOTIFY_EMAIL=<Empfänger der Warnungen>
+
+   Absender und Warnungsempfänger sind getrennt. Ohne CERT_MONITOR_NOTIFY_EMAIL
+   wird ROOT_EMAIL verwendet; ohne Empfänger oder SMTP-Zugang läuft die Prüfung,
+   **aber es werden keine Warnungen versendet**. Keine Zugangsdaten im Frontend
+   oder im Repository hinterlegen. MAIL_FROM/MAIL_ADDRESS sind einfache
+   E-Mail-Adressen ohne Anzeigenamen. Port 465 nutzt direkt TLS; für Port 587
+   MAIL_SECURE=false setzen – STARTTLS ist dennoch zwingend, inklusive gültiger
+   Serverzertifikate. Zugangsdaten werden nie an das Frontend zurückgegeben.
+   SPF/DKIM und möglichst DMARC beim Mailanbieter für jacktools.net einrichten;
+   bei der Testmail auch den Spamordner prüfen.
+
+5. Als Root im Company-Admin **Testmail senden** (Briefsymbol) auslösen.
+   Das testet den tatsächlichen SMTP-Versand an den konfigurierten Empfänger.
+   **Jetzt prüfen** startet einen Hintergrundlauf; die Oberfläche zeigt den
+   Fortschritt und aktualisiert die Ergebnisse. Ein Klick auf einen Eintrag
+   öffnet die Zertifikatsdetails im Overlay.
+
+### Ablauf und Benachrichtigungen
+
+- Standardmäßig täglich **00:40 Uhr Europe/Berlin**, zusätzlich einmal beim
+  Backend-Start (CERT_MONITOR_CHECK_ON_START=false unterdrückt den Startlauf).
+  Die zeitgesteuerte Prüfung läuft im Node-Prozess. Dafür muss dieser dauerhaft
+  laufen; während ausgeschaltetem Backend gibt es keine Prüfung.
+- Warnung bei höchstens 30, kritisch bei höchstens 14 Resttagen; die Grenzen sind
+  konfigurierbar. Abgelaufene Zertifikate, TLS-/DNS-/Verbindungsfehler werden
+  gesondert ausgewiesen. Dies ist keine vollständige TLS-/Cipher-/OCSP-Analyse.
+- Eine zusammengefasste E-Mail bei erstmaliger Auffälligkeit, Statuswechsel und
+  Rückkehr zu „gültig“ (CERT_MONITOR_NOTIFY_RECOVERY=false unterdrückt Entwarnungen).
+  Unveränderte Zustände erzeugen keine täglichen Wiederholungen.
+- Der zuletzt erfolgreich gemeldete Zustand wird separat in PostgreSQL gehalten:
+  schlägt SMTP fehl, wird beim nächsten Prüflauf erneut versucht. Versandfehler
+  sind in „Prüfung & Versand“ sichtbar. SMTP-Zustellung und DB-Bestätigung können
+  nicht atomar erfolgen: bei einem Absturz nach Versand ist eine doppelte
+  Benachrichtigung möglich.
+- Eine atomare PostgreSQL-Lease sperrt parallele Prüfungen auch über mehrere
+  Node-Prozesse und CLI-Aufrufe hinweg. Maximal vier Ziele gleichzeitig,
+  vollständiges DNS-/TLS-Timeout pro Ziel (Standard acht Sekunden).
+  Die Lease läuft nach einem harten Prozessabbruch nach 15 Minuten aus.
+  Manuelle Checks und Testmails: jeweils maximal ein Start pro Minute.
+- Keine frei wählbaren Scan-Ziele per API. Private, Loopback-, Link-Local-,
+  Metadaten- und andere nichtöffentliche DNS-Adressen werden blockiert, auch bei
+  gemischten DNS-Antworten. Die geprüfte IP wird vor dem TLS-Aufbau festgelegt,
+  damit DNS-Rebinding keine interne Verbindung erlaubt. Keine HTTP-Weiterleitungen.
+- Admin und Root dürfen Übersicht/Details lesen und Prüfungen starten.
+  Konten mit temporärem Passwort müssen dieses zuerst ändern. SMTP-Testmails
+  sind Root vorbehalten. Mutationen erfordern Sitzung, exakte erlaubte
+  Company-Origin und CSRF-Token; Aktionen werden auditiert.
+- Gespeichert werden das jeweils letzte Ergebnis je Domain, der zuletzt
+  gemeldete Zustand und Lauf-/Versandmetadaten. Entfernte Ziele werden beim
+  nächsten erfolgreichen Lauf bereinigt. Kein Bezug zu Clock-/Stream-Daten.
+
+### Alternativ: externer Cronjob
+
+Falls der Hoster einen Server-Cronjob verwenden soll:
+CERT_MONITOR_SCHEDULER_ENABLED=false setzen (Überwachung selbst bleibt aktiv).
+Den gleichen Umgebungszugang wie für das Backend sicher bereitstellen; viele
+Hoster vererben die Web-Prozess-Umgebung **nicht** an Cronjobs. Die CLI lädt
+alternativ backend/.env am festen Projektpfad. Diese Datei nicht öffentlich
+ausliefern und nur für den ausführenden Benutzer lesbar halten.
+
+    # Entwicklung, im backend-Ordner:
+    npm run certificates:check
+    # Produktion, nach dem Build:
+    npm run certificates:check:production
+
+Beispiel mit absoluten Pfaden für die Crontab:
+
+    40 0 * * * cd /ABSOLUTER/PFAD/backend && /ABSOLUTER/PFAD/node dist/cli.js certificates:check >> /ABSOLUTER/PFAD/certificates.log 2>&1
+
+Die Zeitzone des externen Cronjobs wird vom Hoster festgelegt, nicht von der
+Node-Cron-Einstellung. Node >=24.17.0 verwenden. Beide Scheduler nicht parallel
+betreiben; die DB-Sperre verhindert Überschneidungen, ersetzt aber keinen
+eindeutigen Betriebszeitplan.
+
+Tests: npm test enthält lokale TLS-/DNS-/SSRF-/Template-Regressionen;
+npm run test:local prüft Berechtigungen, CSRF, Mehrprozess-Sperre, Zustandswechsel,
+SMTP-Fehlerwiederholung und Entwarnung gegen eine wegwerfbare PostgreSQL-Datenbank.
+Die Tests senden **keine echten E-Mails**. SMTP-Daten und realer Empfang können erst
+nach Anlegen/Konfigurieren des eigenen Postfachs geprüft werden.

@@ -2,6 +2,13 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "name": "Prüfung: JackTools Zertifikate einmalig",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "npm exec --yes --package=node@24.17.0 --package=npm@11 -- npm run certificates:check",
+      "cwd": "${workspaceFolder}/backend"
+    },
+    {
       "name": "Start: JackTools Backend lokal komplett (DB + Migrationen + Server)",
       "type": "node-terminal",
       "request": "launch",
