@@ -11,14 +11,14 @@ const dialog=$('admin-reset-dialog') as HTMLDialogElement;
 class RequestError extends Error{constructor(public code:string){super(code);}}
 function message(error:unknown){return error instanceof RequestError?t.errors[error.code as keyof typeof t.errors]||t.errors.internal_error:t.unavailable;}
 function status(text:string,error=false){$('admin-status').textContent=text;$('admin-status').dataset.error=String(error);}
-function signedOut(){csrf='';user=null;$('admin-login-panel').hidden=false;$('admin-workspace').hidden=true;$('admin-users').replaceChildren();dialog.close();root.querySelectorAll<HTMLInputElement>('input[type=password]').forEach(input=>input.value='');}
+function signedOut(){root.dataset.state='signed-out';csrf='';user=null;$('admin-login-panel').hidden=false;$('admin-workspace').hidden=true;$('admin-users').replaceChildren();dialog.close();root.querySelectorAll<HTMLInputElement>('input[type=password]').forEach(input=>input.value='');}
 async function api<T=Record<string,never>>(path:string,method='GET',body?:unknown):Promise<T>{
  const response=await fetch(base+'/api/v1/'+path,{method,credentials:'include',cache:'no-store',signal:AbortSignal.timeout(15000),headers:{...(method==='GET'?{}:{'Content-Type':'application/json','X-CSRF-Token':csrf})},...(body===undefined?{}:{body:JSON.stringify(body)})});
  if(!response.ok){const value=await response.json().catch(()=>({error:'internal_error'}));if(value.error==='unauthenticated')signedOut();throw new RequestError(value.error||'internal_error');}
  return response.status===204?undefined as T:await response.json() as T;
 }
 function showUser(next:User){
- user=next;$('admin-login-panel').hidden=true;$('admin-workspace').hidden=false;
+ root.dataset.state='signed-in';user=next;$('admin-login-panel').hidden=true;$('admin-workspace').hidden=false;
  $('admin-identity').textContent=next.displayName||next.username;$('admin-role').textContent=next.role==='root'?t.root:t.admin;
  $('admin-password-required').hidden=!next.mustChangePassword;$('admin-profile-panel').hidden=next.mustChangePassword;
  $('admin-users-panel').hidden=next.role!=='root'||next.mustChangePassword;

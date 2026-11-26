@@ -69,7 +69,7 @@ const canonical = new URL(Astro.props.canonicalPath ?? (Astro.url.pathname === '
     </script>
     <ThemeInit namespace="jacktools.company" />
   </head>
-  <body class:list={{ "legal-document": legal }} data-quiet-background={Astro.props.quietBackground ? "true" : undefined}>
+  <body class:list={{ "legal-document": legal, "admin-page": Astro.props.route === "admin" }} data-quiet-background={Astro.props.quietBackground ? "true" : undefined}>
     <a class="skip-link" href="#main">{lang === 'de' ? 'Zum Inhalt' : lang === 'es' ? 'Ir al contenido' : lang === 'fr' ? 'Aller au contenu' : 'Skip to content'}</a>
     <canvas id="ambient-background" class="ambient-background" aria-hidden="true" hidden></canvas>
     <div class="site-shell">

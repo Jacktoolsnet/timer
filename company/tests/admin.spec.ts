@@ -33,6 +33,16 @@ async function signIn(page:Page){
 for(const lang of ['de','en','es','fr'])test(`admin page is integrated, translated and noindex in ${lang}`,async({page,request})=>{
  const errors:string[]=[];page.on('pageerror',error=>errors.push(error.message));await mockBackend(page);await page.goto('/'+lang+'/admin/');
  await expect(page.locator('#admin-login-panel')).toBeVisible();await expect(page.locator('#admin-workspace')).toBeHidden();
+ await expect(page.locator('.admin-heading')).toBeHidden();
+ await expect(page.locator('#admin-login-panel>p')).toHaveCount(0);
+ await expect(page.locator('#admin-status')).toBeEmpty();
+ await expect(page.locator('h1:visible')).toHaveCount(1);
+ await expect.poll(async()=>{
+  const card=await page.locator('#admin-login-panel').boundingBox();const main=await page.locator('#main').boundingBox();
+  if(!card||!main)return Infinity;
+  return Math.max(Math.abs(card.x+card.width/2-(main.x+main.width/2)),Math.abs(card.y+card.height/2-(main.y+main.height/2)));
+ }).toBeLessThan(3);
+
  await expect(page.locator('meta[name=robots]')).toHaveAttribute('content','noindex, follow');await expect(page.locator('.site-header .brand')).toBeVisible();
  await expect(page.locator(`.site-footer a[href="/${lang}/admin/"]`)).toHaveText('Admin');
  await expect(page.locator('.language-menu a[lang=en]')).toHaveAttribute('href',/\/en\/admin\//);
@@ -48,7 +58,7 @@ test('root manages admins without storing credentials and logout clears protecte
  await page.locator('#admin-reset-form [name=password]').fill('new-temporary-password!');await page.locator('#admin-reset-form button[type=submit]').click();await expect(page.locator('#admin-reset-dialog')).toBeHidden();
  expect(await page.evaluate(()=>localStorage.length)).toBe(0);expect(await page.evaluate(()=>sessionStorage.length)).toBe(0);
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
- await page.locator('#admin-logout').click();await expect(page.locator('#admin-workspace')).toBeHidden();await expect(page.locator('#admin-users')).toBeEmpty();
+ await page.locator('#admin-logout').click();await expect(page.locator('#admin-workspace')).toBeHidden();await expect(page.locator('#jt-admin')).toHaveAttribute('data-state','signed-out');await expect(page.locator('#admin-users')).toBeEmpty();
 });
 test('ordinary admins cannot see account management and must change temporary password',async({page})=>{
  await mockBackend(page,'admin',true);await page.goto('/en/admin/');await signIn(page);
