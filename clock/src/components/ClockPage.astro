@@ -1,5 +1,4 @@
 ---
-import ClockCast from './ClockCast.astro';
 import Sundial from './Sundial.astro';
 import { sundialText } from '../lib/sundial-text';
 import AdBanner from '../../../shared/AdBanner.astro';
@@ -19,8 +18,8 @@ import AnimatedAurora from './AnimatedAurora.astro';
 import SeasonalBackground from './SeasonalBackground.astro';
 import { clockText } from '../lib/clock-text';
 import { clockBackgrounds, backgroundText, locationText } from '../lib/clock-backgrounds';
-interface Props { lang: Language; receiver?: boolean }
-const {lang,receiver=false}=Astro.props; const t=getDictionary(lang);const c=clockText[lang];const guide=clockGuide[lang];
+interface Props { lang: Language }
+const {lang}=Astro.props; const t=getDictionary(lang);const c=clockText[lang];const guide=clockGuide[lang];
 const groups={de:{display:'Uhr & Datum',behavior:'Zeit & Verhalten'},en:{display:'Clock & date',behavior:'Time & behavior'},es:{display:'Reloj y fecha',behavior:'Hora y comportamiento'},fr:{display:'Horloge et date',behavior:'Heure et comportement'}}[lang];
 const alarm=alarmText[lang];
 const sun=sundialText[lang];
@@ -28,10 +27,8 @@ const designs=analogDesignText[lang];const dial=dialText[lang];
 const backgrounds=backgroundText[lang];const location=locationText[lang];
 const seo=toolSeo.clock[lang];
 ---
-<Layout lang={lang} title={seo.title} description={seo.description} route="" noindex={receiver} receiver={receiver}>
-<div slot="header-focus" class="header-focus-actions">{!receiver && <ClockCast lang={lang}/>}<button id="clock-focus" class="icon-text" aria-label={t.focusMode} aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5"/></svg><span>{t.focusMode}</span></button></div>
-{receiver && <video class="castMediaElement" hidden aria-hidden="true" />}
-{receiver && <p id="cast-receiver-status" role="status">JackTools Clock · Waiting for settings from your phone …</p>}
+<Layout lang={lang} title={seo.title} description={seo.description} route="">
+<div slot="header-focus" class="header-focus-actions"><button id="clock-focus" class="icon-text" aria-label={t.focusMode} aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5"/></svg><span>{t.focusMode}</span></button></div>
 <section class="intro"><p class="eyebrow">{c.title}</p><h1>{seo.heading}</h1><p class="intro-copy">{seo.description}</p></section>
 <div id="clock-app" data-text={JSON.stringify({...t,...c})}>
 <div class="workspace">
@@ -65,7 +62,7 @@ const seo=toolSeo.clock[lang];
 </div>
 <p id="wake-status" class="timer-status" role="status"></p><noscript>{t.js}</noscript>
 </section>
-{!receiver && <AdBanner lang={lang} />}
+<AdBanner lang={lang} />
 <aside class="settings-card"><h2>{t.settings}</h2><form id="clock-settings" class="clock-settings">
 <fieldset class="clock-settings-group"><legend>{groups.display}</legend>
 <label>{t.appearance}<select name="view" data-preview-class="clock-view-thumbnail">{clockTypes.map(v=><option value={v} data-preview={viewPreview(v)} selected={v==='analog'}>{v==='sundial'?sun.sundial:c[v]}</option>)}</select></label>
@@ -106,7 +103,7 @@ const seo=toolSeo.clock[lang];
 <ClockAlarm lang={lang} />
 <p id="clock-settings-status" role="status"></p>
 </form></aside></div></div>
-{!receiver && <ToolInformation lang={lang} tool="clock" />}
+<ToolInformation lang={lang} tool="clock" />
 <section class="guide"><div class="guide-heading"><p class="eyebrow">THE JACKTOOLS.NET WAY</p><h2>{guide.heading}</h2><p>{guide.body}</p></div><div class="guide-grid">{guide.steps.map(([title,body],i)=><article><span class="step-number">0{i+1}</span><h3>{title}</h3><p>{body}</p></article>)}</div></section>
 <section class="faq"><h2>{t.faq}</h2>{guide.faq.map(([question,answer])=><details><summary>{question}<span aria-hidden="true">+</span></summary><p>{answer}</p></details>)}</section>
 <dialog id="alarm-dialog" aria-labelledby="alarm-dialog-title"><div class="dialog-inner"><h2 id="alarm-dialog-title">{alarm.ringing}</h2><p id="alarm-dialog-time"></p><p id="alarm-dialog-audio" role="status"></p><div class="dialog-actions"><button id="alarm-stop" type="button" class="primary" autofocus>{alarm.stop}</button><button id="alarm-snooze" type="button" class="secondary">{alarm.snooze}</button></div></div></dialog>

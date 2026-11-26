@@ -2,7 +2,6 @@ import { initializeTheme } from '../../../shared/theme';
 import './focus-cursor';
 import { storageAllowed, CONSENT_KEY } from '../lib/storage';
 import { STORAGE_KEY, type ColorScheme } from '../lib/engine';
-if(document.documentElement.dataset.castReceiver!=='true'){
 initializeTheme(() => persistAppearance());
 const dialog = document.querySelector<HTMLDialogElement>('#privacy-dialog')!;
 document.querySelector('#privacy-open')?.addEventListener('click', () => dialog.showModal());
@@ -135,4 +134,3 @@ remember.addEventListener('change', () => {
     document.querySelector('#storage-status')!.textContent = document.querySelector<HTMLElement>('#clear-storage')!.dataset.error!;
   }
 });
-}

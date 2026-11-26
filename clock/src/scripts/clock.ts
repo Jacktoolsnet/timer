@@ -1,7 +1,3 @@
-import {createCastSender} from './cast-sender';
-import {startCastReceiver} from './cast-receiver';
-import {validateCastState,type CastState} from '../lib/cast-state';
-import type {SeasonalLocation} from '../lib/seasonal-location';
 import {createViewControls} from './view-controls';
 import {createDialControls} from './dial-controls';
 import {createBinaryClock} from './binary-clock';
@@ -16,9 +12,6 @@ import {screenWakeLock} from '../lib/wake-lock';
 import {createSeasonalBackground} from './seasonal-background';
 import {createSeasonalLocation} from './seasonal-location';
 import {clockBackgrounds,clockBackgroundOptions} from '../lib/clock-backgrounds';
-const isReceiver=document.documentElement.dataset.castReceiver==='true';
-let castLocation:SeasonalLocation|undefined;
-let publishCast=()=>{};
 const $=(id:string)=>document.getElementById(id)!;
 const t=JSON.parse($('clock-app').dataset.text!);
 const form=$('clock-settings') as HTMLFormElement;
@@ -44,7 +37,7 @@ function applyTransparency(){
 const updateBinary=createBinaryClock($('binary-clock'));
 const sundial=createSundial();
 const seasonal=createSeasonalBackground($('seasonal-background') as unknown as SVGSVGElement);
-const geolocation=isReceiver?{get location(){return castLocation;},status:'',pending:false,clear(){castLocation=undefined;},setActive(_active:boolean){}}:createSeasonalLocation($('seasonal-settings'),()=>configure());
+const geolocation=createSeasonalLocation($('seasonal-settings'),()=>configure());
 const alarm=createAlarm($('clock-alarm'),$('alarm-dialog') as HTMLDialogElement,$('clock-alarm-badge'));
 const wake=screenWakeLock($('wake-status'),'',t.unavailable);
 const styledDate = createClockDate($('styled-date'));
@@ -106,7 +99,7 @@ function configure(){
  if(face.dataset.design!==settings.analogDesign){$('dial-face').innerHTML=dialMarkup(settings.analogDesign as AnalogDesign);face.dataset.design=settings.analogDesign;}
  face.querySelector<SVGElement>('.dial-numerals')!.style.display=settings.numbers?'':'none';$('second-hand').style.display=settings.seconds?'':'none';
  $('orbit-clock').querySelector<SVGElement>('.orbit-second')!.style.display=settings.seconds?'':'none';
- lastFlipTick = 0; wake(settings.awake);render();publishCast();
+ lastFlipTick = 0; wake(settings.awake);render();
 }
 function orbitPoint(degrees:number,radius:number){
  const angle=degrees*Math.PI/180;
@@ -142,12 +135,12 @@ function save(){if(!storageAllowed())return;try{localStorage.setItem('jacktools.
 form.addEventListener('submit',e=>e.preventDefault());form.addEventListener('change',()=>{for(const key of Object.keys(defaults)){const input=field(key);Object.assign(settings,{[key]:key==='view'?viewControls.selectedView():input.type==='checkbox'?(input as HTMLInputElement).checked:input.type==='range'?Number(input.value):input.value});}configure();save();});
 field('transparency').addEventListener('input',()=>{
  settings.transparency=Number(field('transparency').value);
- applyTransparency();save();publishCast();
+ applyTransparency();save();
 });
 document.addEventListener('storage-enabled',save);
 document.addEventListener('preferences-cleared',()=>{geolocation.clear();configure();});
 let ownsFullscreen=false;
-function focus(on:boolean){if(isReceiver)return;document.body.classList.toggle('focus-view',on);const b=$('clock-focus');b.setAttribute('aria-pressed',String(on));b.setAttribute('aria-label',on?t.exitFocus:t.focusMode);b.querySelector('span')!.textContent=on?t.exitFocus:t.focusMode;}
+function focus(on:boolean){document.body.classList.toggle('focus-view',on);const b=$('clock-focus');b.setAttribute('aria-pressed',String(on));b.setAttribute('aria-label',on?t.exitFocus:t.focusMode);b.querySelector('span')!.textContent=on?t.exitFocus:t.focusMode;}
 async function leave(){focus(false);if(ownsFullscreen&&document.fullscreenElement){ownsFullscreen=false;await document.exitFullscreen().catch(()=>{});}}
 $('clock-focus').addEventListener('click',async()=>{if(document.body.classList.contains('focus-view'))return leave();focus(true);if(!document.fullscreenElement)try{await document.documentElement.requestFullscreen();ownsFullscreen=true;if(!document.body.classList.contains('focus-view'))await leave();}catch{}});
 document.addEventListener('fullscreenchange',()=>{if(!document.fullscreenElement){ownsFullscreen=false;focus(false);}});document.addEventListener('keydown',e=>{if(e.key==='Escape')void leave();});
@@ -159,29 +152,3 @@ document.addEventListener('visibilitychange',()=>{
 configure();setInterval(()=>{if(!document.hidden)render();},50);document.addEventListener('visibilitychange',()=>{if(!document.hidden){configure();}});
 
 enhanceClockSelects(form);
-
-if(isReceiver){
- void startCastReceiver(input=>{
-  const state=validateCastState(input,defaults,form);if(!state)return false;
-  Object.assign(settings,state.settings);
-  castLocation=state.location||undefined;
-  const root=document.documentElement;
-  root.lang=state.language;
-  Object.assign(root.dataset,{palette:state.appearance.palette,style:state.appearance.style,theme:state.appearance.theme,themeMode:state.appearance.theme,fontSize:state.appearance.fontSize});
-  // A sender's local IANA zone may not be one of our curated dropdown entries.
-  const zoneField=field('zone') as HTMLSelectElement;
-  if(![...zoneField.options].some(o=>o.value===settings.zone))zoneField.add(new Option(settings.zone,settings.zone));
-  for(const [key,value] of Object.entries(settings)){
-   if(typeof value==='boolean')(field(key) as HTMLInputElement).checked=value;else field(key).value=String(value);
-  }
-  configure();return true;
- });
-}else{
- const sender=createCastSender((shareLocation):CastState=>{
-  const root=document.documentElement;
-  return {version:1,type:'settings',settings:{...settings,awake:false,zone:settings.zone==='local'?Intl.DateTimeFormat().resolvedOptions().timeZone:settings.zone},
-   appearance:{palette:root.dataset.palette||'green',style:root.dataset.style||'technical',theme:root.dataset.theme==='dark'?'dark':'light',fontSize:root.dataset.fontSize||'0'},
-   language:root.lang,location:shareLocation&&geolocation.location?{...geolocation.location}:null};
- });
- publishCast=sender.update;
-}
