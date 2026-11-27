@@ -119,7 +119,8 @@ test('pairing validity counts down, expires without displaying an old QR and res
  await expect(page.locator('#tv-validity-label')).toHaveText('Code abgelaufen');
  await expect(page.locator('#tv-validity-progress')).toHaveAttribute('value','0');
  await expect(page.locator('#tv-qr')).toBeHidden();await expect(page.locator('#tv-code')).toBeHidden();
- await page.locator('#tv-retry').click();
+ await expect(page.locator('#tv-retry')).toBeFocused();
+ await page.keyboard.press('Enter');
  await expect(page.locator('#tv-countdown')).toHaveText('00:10');
  await expect(page.locator('#tv-validity-label')).toHaveText('Code gültig für');
  await expect(page.locator('#tv-qr')).toBeVisible();expect(created).toBe(2);
@@ -170,4 +171,41 @@ test('receiver remote navigation survives delayed preview loading and preserves 
  await page.keyboard.press('Enter');
  await expect.poll(()=>approved).toBe(1);
  await expect(page.locator('body')).toHaveClass(/tv-ready/);
+});
+
+test('receiver retry is focused on initial and repeated failures and works with Enter',async({page})=>{
+ let attempts=0;
+ await page.route('**/api/v1/tv/**',route=>{
+  if(route.request().url().endsWith('/receivers/')){
+   attempts++;
+   if(attempts<=2)return route.fulfill({status:503,json:{error:'unavailable'}});
+   return route.fulfill({json:{id:'retry-test',receiverToken:'a'.repeat(64),pairToken:'b'.repeat(64),code:'12345678',pairSeconds:600}});
+  }
+  return route.fulfill({json:{state:'waiting',revision:0,acknowledged:0}});
+ });
+ await page.goto('/en/stream/');
+ const retry=page.locator('#tv-retry');
+ await expect(retry).toBeFocused();expect(attempts).toBe(1);
+ await page.keyboard.press('Enter');
+ await expect.poll(()=>attempts).toBe(2);
+ await expect(retry).toBeEnabled();await expect(retry).toBeFocused();
+ await page.keyboard.press('Enter');
+ await expect(page.locator('#tv-code')).toHaveText('1234 5678');
+ await expect(retry).toBeHidden();expect(attempts).toBe(3);
+});
+
+test('receiver retry takes focus when a pending pairing session expires',async({page})=>{
+ let expired=false;
+ await page.route('**/api/v1/tv/**',route=>{
+  if(route.request().url().endsWith('/receivers/'))return route.fulfill({json:{id:'expired-test',receiverToken:'a'.repeat(64),pairToken:'b'.repeat(64),code:'12345678',pairSeconds:600}});
+  if(expired)return route.fulfill({status:410,json:{error:'expired'}});
+  return route.fulfill({json:{state:'pending',revision:1,acknowledged:0,snapshot}});
+ });
+ await page.goto('/en/stream/');
+ await expect(page.locator('#tv-approve')).toBeFocused();
+ await page.keyboard.press('ArrowRight');await expect(page.locator('#tv-reject')).toBeFocused();
+ expired=true;
+ await expect(page.locator('#tv-retry')).toBeFocused();
+ await expect(page.locator('#tv-approve')).toBeHidden();
+ await expect(page.locator('#tv-reject')).toBeHidden();
 });

@@ -105,13 +105,19 @@ export function createClockTv(options:{snapshot:(includeLocation?:boolean)=>TvSn
    }
    schedule(receiver||!running?2000:4000);
   }catch(error){
-   if(error instanceof TvError&&[401,404,410].includes(error.status)){forget();status(t.expired);if(receiver){clearPreview();$('tv-validity').hidden=true;$('tv-proposal').hidden=true;$('tv-retry').hidden=false;if(!running){$('tv-qr').hidden=true;$('tv-code').hidden=true;$('tv-approve').hidden=true;$('tv-reject').hidden=true;}}else{($('tv-share-location') as HTMLInputElement).checked=false;setSenderConnected(false);}return;}
+   if(error instanceof TvError&&[401,404,410].includes(error.status)){forget();status(t.expired);if(receiver){clearPreview();$('tv-validity').hidden=true;$('tv-proposal').hidden=true;showRetry();if(!running){$('tv-qr').hidden=true;$('tv-code').hidden=true;$('tv-approve').hidden=true;$('tv-reject').hidden=true;}}else{($('tv-share-location') as HTMLInputElement).checked=false;setSenderConnected(false);}return;}
    if(error instanceof TvError&&error.status===409){schedule();return;}
    status(t.offline);backoff=Math.min(backoff*2,30000);schedule(backoff);
   }finally{busy=false;}
  }
+ function focusRetry(){
+  if(!receiver||$('tv-receiver-panel').hidden)return;
+  const button=$('tv-retry') as HTMLButtonElement;
+  if(!button.hidden&&!button.disabled)button.focus();
+ }
+ function showRetry(){$('tv-retry').hidden=false;focusRetry();}
  function setSenderConnected(connected:boolean){if(connected)scanner?.close();$('tv-pair-form').hidden=connected;$('tv-detach').hidden=!connected;if(!connected){qrSecret='';const input=$('tv-pair-code') as HTMLInputElement;input.required=true;input.parentElement!.hidden=false;$('tv-code-entry').hidden=false;keypad?.sync();}}
- async function action(button:HTMLButtonElement,work:()=>Promise<void>){if(busy)return;busy=true;button.disabled=true;try{await work();}catch(error){if(error instanceof TvError&&error.code==='invalid_pairing'&&!receiver)setSenderConnected(false);status(error instanceof TvError&&error.code==='invalid_pairing'?t.invalid:t.failed);}finally{busy=false;button.disabled=false;keypad?.sync();schedule();}}
+ async function action(button:HTMLButtonElement,work:()=>Promise<void>){if(busy)return;busy=true;button.disabled=true;try{await work();}catch(error){if(error instanceof TvError&&error.code==='invalid_pairing'&&!receiver)setSenderConnected(false);status(error instanceof TvError&&error.code==='invalid_pairing'?t.invalid:t.failed);}finally{busy=false;button.disabled=false;focusRetry();keypad?.sync();schedule();}}
  if(receiver){
   function startCountdown(seconds:number,requestedAt:number){
    const duration=Number.isFinite(seconds)&&seconds>0?Math.min(seconds,600):600;
@@ -126,7 +132,7 @@ export function createClockTv(options:{snapshot:(includeLocation?:boolean)=>TvSn
     if(remaining===0){
      forget();clearPreview();$('tv-validity-label').textContent=t.codeExpired;
      $('tv-qr').hidden=true;$('tv-code').hidden=true;$('tv-proposal').hidden=true;
-     $('tv-approve').hidden=true;$('tv-reject').hidden=true;$('tv-retry').hidden=false;status('');
+     $('tv-approve').hidden=true;$('tv-reject').hidden=true;showRetry();status('');
     }
    }
    refreshCountdown=update;validityTimer=window.setInterval(update,1000);update();
@@ -141,7 +147,7 @@ export function createClockTv(options:{snapshot:(includeLocation?:boolean)=>TvSn
     const link=new URL('/'+document.documentElement.lang+'/pair/',location.origin);link.hash='tv='+created.pairToken;
     try{await QRCode.toCanvas($('tv-qr') as HTMLCanvasElement,link.href,{width:208,margin:4,errorCorrectionLevel:'M'});$('tv-qr').hidden=false;}catch{/* Numeric code remains usable. */}
     startCountdown(created.pairSeconds,requestedAt);schedule();
-   }catch{status(t.failed);$('tv-code').textContent='';$('tv-retry').hidden=false;}
+   }catch{status(t.failed);$('tv-code').textContent='';showRetry();}
   }
   $('tv-approve').addEventListener('click',event=>void action(event.currentTarget as HTMLButtonElement,async()=>{
    receiverControls?.requestFullscreen();
