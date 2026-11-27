@@ -1,10 +1,11 @@
+import {loadReceiverDisplay,saveReceiverDisplay,clearReceiverDisplay} from './tv-receiver-storage';
 import {storageAllowed} from '../lib/storage';
 import {createReceiverApproval} from './tv-approval-controls';
 import {createReceiverControls} from './tv-receiver-controls';
 import {createTvScanner} from './tv-scanner';
 import {createTvKeypad} from './tv-keypad';
 import QRCode from 'qrcode';
-import type {tvText} from '../lib/tv-text';
+import {tvText} from '../lib/tv-text';
 export type TvSnapshot={version:1;settings:Record<string,string|number|boolean>;appearance:{palette:string;style:string;theme:string;fontSize:string};language:string;senderName?:string;displayScale?:number;coordinates?:{latitude:number;longitude:number}};
 type State={state:'waiting'|'pending'|'active'|'detached';revision:number;acknowledged:number;snapshot?:TvSnapshot};
 // Browsers do not expose a reliable device hostname. Send only a coarse, advisory label.
@@ -17,20 +18,37 @@ export function senderDeviceName(){
 class TvError extends Error{constructor(public status:number,public code:string){super(code);}}
 export function createClockTv(options:{snapshot:(includeLocation?:boolean)=>TvSnapshot;apply:(snapshot:TvSnapshot)=>void}){
  const root=document.getElementById('clock-tv');if(!root)return;
+ document.addEventListener('preferences-cleared',clearReceiverDisplay);
  const scaleKey='jacktools-clock-stream-size';
  const validScale=(value:unknown)=>typeof value==='number'&&Number.isInteger(value)&&value>=60&&value<=100;
  let displayScale=100;
  if(root.dataset.receiver!=='true'&&storageAllowed())try{const saved=Number(localStorage.getItem(scaleKey));if(validScale(saved))displayScale=saved;}catch{/* Storage may be unavailable. */}
  const streamSnapshot=(includeLocation=false):TvSnapshot=>({...options.snapshot(includeLocation),displayScale});
  function apply(snapshot:TvSnapshot){
+  syncReceiverLanguage(snapshot.language);
   const scale=validScale(snapshot.displayScale)?snapshot.displayScale!:100;
   document.body.style.setProperty('--tv-display-scale',String(scale/100));
   document.body.style.setProperty('--tv-edge-inset-x',String((100-scale)/2)+'vw');
   document.body.style.setProperty('--tv-edge-inset-y',String((100-scale)/2)+'vh');
   options.apply(snapshot);
  }
- const t=JSON.parse(root.dataset.text!) as typeof tvText.en,receiver=root.dataset.receiver==='true';
+ let t=JSON.parse(root.dataset.text!) as typeof tvText.en;
+ const receiver=root.dataset.receiver==='true';
  const $=(id:string)=>document.getElementById(id)!;
+ function syncReceiverLanguage(language:string){
+  if(!receiver||!(language in tvText))return;
+  t=tvText[language as keyof typeof tvText];
+  document.documentElement.lang=language;
+  // Update existing nodes in place: never reload or lose receiver approval/focus.
+  const panel=$('tv-receiver-panel');panel.setAttribute('aria-label',t.title);
+  for(const [id,key] of [['tv-title','title'],['tv-approve','approve'],['tv-reject','reject'],['tv-retry','retry']] as const)$(id).textContent=t[key];
+  panel.querySelector('p.tv-pairing-info')!.textContent=t.waiting;
+  $('tv-loading').lastElementChild!.textContent=t.loading;
+  $('tv-preview').setAttribute('title',t.preview);
+  $('tv-stop').setAttribute('aria-label',t.stop);$('tv-stop').setAttribute('title',t.stop);
+  $('tv-validity-progress').setAttribute('aria-label',t.codeValidFor);
+ }
+
  // Preview renders the same clock in an isolated frame, without pairing, location or wake lock.
  if(receiver&&window.parent!==window&&new URLSearchParams(location.search).get('preview')==='1'){
   document.body.classList.add('tv-preview','tv-ready');
@@ -103,6 +121,7 @@ export function createClockTv(options:{snapshot:(includeLocation?:boolean)=>TvSn
    if(receiver){
     if(state.state==='detached'&&!state.snapshot){await stopReceiver();return;}
     if(state.state==='pending'){
+     if(state.snapshot)syncReceiverLanguage(state.snapshot.language);
      $('tv-proposal').hidden=false;$('tv-approve').hidden=receiverLoading;$('tv-reject').hidden=receiverLoading;$('tv-qr').hidden=true;$('tv-code').hidden=true;
      const first=!pendingSnapshot;pendingSnapshot=state.snapshot;
      $('tv-receiver-panel').dataset.pending='true';
@@ -112,7 +131,7 @@ export function createClockTv(options:{snapshot:(includeLocation?:boolean)=>TvSn
      sendPreview();status('');
      if(first)receiverApproval?.focusDefault();else receiverApproval?.ensureFocus();
     }else if((state.state==='active'||state.state==='detached')&&state.snapshot){
-     if(revision<state.revision){refreshCountdown=undefined;window.clearInterval(validityTimer);clearPreview();apply(state.snapshot);running=true;showReceiver(true);revision=state.revision;}
+     if(revision<state.revision){refreshCountdown=undefined;window.clearInterval(validityTimer);clearPreview();apply(state.snapshot);saveReceiverDisplay(state.snapshot);running=true;showReceiver(true);revision=state.revision;}
      if(state.state==='active'&&state.acknowledged!==state.revision)await api(session.id+'/ack','POST',{revision:state.revision});
      status('');
      if(state.state==='detached'){forget();status(t.expired);return;}
@@ -181,6 +200,7 @@ export function createClockTv(options:{snapshot:(includeLocation?:boolean)=>TvSn
   }));
   async function stop(){
    if(session)await api(session.id+'/stop','POST',{});
+   clearReceiverDisplay();
    forget();running=false;receiverControls?.setActive(false);
    if(document.fullscreenElement&&document.exitFullscreen)try{await document.exitFullscreen();}catch{/* The QR page remains usable if browser fullscreen cannot be closed. */}
    document.body.classList.remove('tv-ready');await start();
@@ -189,7 +209,12 @@ export function createClockTv(options:{snapshot:(includeLocation?:boolean)=>TvSn
   $('tv-reject').addEventListener('click',event=>void action(event.currentTarget as HTMLButtonElement,stop));
   $('tv-stop').addEventListener('click',event=>void action(event.currentTarget as HTMLButtonElement,stop));
   $('tv-retry').addEventListener('click',event=>void action(event.currentTarget as HTMLButtonElement,async()=>{if(session)await api(session.id+'/stop','POST',{});await start();}));
-  void start();
+  // Restoring a display does not restore a capability or silently pair a sender.
+  const remembered=loadReceiverDisplay();
+  if(remembered){
+   try{apply(remembered);running=true;showReceiver(true);status('');}
+   catch{clearReceiverDisplay();void start();}
+  }else void start();
  }else{
   const dialog=$('tv-dialog') as HTMLDialogElement;
   let autoCode='';
@@ -237,6 +262,6 @@ export function createClockTv(options:{snapshot:(includeLocation?:boolean)=>TvSn
   const changed=()=>{if(session)schedule(600);};document.getElementById('clock-settings')!.addEventListener('change',changed);document.getElementById('clock-settings')!.addEventListener('input',changed);
   new MutationObserver(changed).observe(document.documentElement,{attributes:true,attributeFilter:['data-palette','data-style','data-font-size','data-theme']});
  }
- // Only the image-size preference may persist with consent, never capabilities, codes or snapshots. The receiver keeps rendering on network loss.
+ // Persist only sender size (with consent) and the receiver display allowlist, never capabilities, codes or coordinates. The receiver keeps rendering on network loss.
  window.addEventListener('pagehide',()=>{window.clearInterval(validityTimer);window.clearTimeout(timer);session=undefined;});
 }

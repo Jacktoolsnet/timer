@@ -1,5 +1,6 @@
 /** Requests a screen lock only on state changes, not on every timer tick. */
-export function screenWakeLock(status: HTMLElement, active: string, unavailable: string) {
+export function screenWakeLock(status: HTMLElement, active: string, unavailable: string | (()=>string)) {
+  const unavailableText=()=>typeof unavailable==='function'?unavailable():unavailable;
   let wanted = false;
   let lock: WakeLockSentinel | null = null;
   let pending = false;
@@ -19,9 +20,9 @@ export function screenWakeLock(status: HTMLElement, active: string, unavailable:
       lock = next;
       status.textContent = active;
       next.addEventListener('release', () => {
-        if (lock === next) { lock = null; status.textContent = wanted && !document.hidden ? unavailable : ''; }
+        if (lock === next) { lock = null; status.textContent = wanted && !document.hidden ? unavailableText() : ''; }
       });
-    } catch { status.textContent = wanted && !document.hidden ? unavailable : ''; }
+    } catch { status.textContent = wanted && !document.hidden ? unavailableText() : ''; }
     finally { pending = false; }
   }
   document.addEventListener('visibilitychange', () => { void sync(); });

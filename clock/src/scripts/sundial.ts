@@ -1,3 +1,4 @@
+import {sundialText} from '../lib/sundial-text';
 import { getTimes } from 'suncalc';
 import { squareRadius, romanNumeral, type AnalogDesign } from '../lib/analog-designs';
 import { sundialState, sundialHours } from '../lib/sundial';
@@ -20,7 +21,8 @@ export function createSundial(){
  const coordinateArea=document.getElementById('sundial-coordinates-area')!;
  const coordinateContainer=document.getElementById('sundial-coordinates')!;
  const nightHint=document.getElementById('sundial-night-hint')!;
- const text=JSON.parse(root.dataset.text!);
+ let text=JSON.parse(root.dataset.text!);
+ let language=document.documentElement.lang;
  const face=document.getElementById('sundial-face')!;
  let design:AnalogDesign='standard',numbers=true,zone='UTC',daylightKey='';
  let location:SeasonalLocation|undefined,last='',active=false,message='',pending=false,facing=1;
@@ -198,6 +200,14 @@ export function createSundial(){
   }
  }
  return {render,configure(enabled:boolean,position:SeasonalLocation|undefined,statusMessage='',isPending=false,selectedDesign:AnalogDesign='standard',showNumbers=true,timeZone='UTC'){
+  const nextLanguage=document.documentElement.lang;
+  if(nextLanguage!==language&&nextLanguage in sundialText){
+   language=nextLanguage;text=sundialText[language as keyof typeof sundialText];daylightKey='';
+   root.dataset.text=JSON.stringify(text);
+   face.setAttribute('aria-label',text.sundial);
+   enableLocation.setAttribute('aria-label',text.missing);
+   shadow.querySelector('title')!.textContent=text.note;
+  }
   active=enabled;root.hidden=!enabled;
   design=selectedDesign;numbers=showNumbers;zone=timeZone;
   if(face.dataset.design!==design){

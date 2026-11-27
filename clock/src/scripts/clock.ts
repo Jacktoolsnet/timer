@@ -1,3 +1,5 @@
+import {getDictionary} from '../lib/i18n';
+import {clockText} from '../lib/clock-text';
 import type {SeasonalLocation} from '../lib/seasonal-location';
 import {tvText} from '../lib/tv-text';
 import {createClockTv,senderDeviceName,type TvSnapshot} from './tv';
@@ -44,7 +46,7 @@ const seasonal=createSeasonalBackground($('seasonal-background') as unknown as S
 let receiverLocation:SeasonalLocation|undefined;
 const geolocation=createSeasonalLocation($('seasonal-settings'),()=>{configure();document.dispatchEvent(new Event('clock-location-changed'));});
 const alarm=createAlarm($('clock-alarm'),$('alarm-dialog') as HTMLDialogElement,$('clock-alarm-badge'));
-const wake=screenWakeLock($('wake-status'),'',t.unavailable);
+const wake=screenWakeLock($('wake-status'),'',()=>t.unavailable);
 const styledDate = createClockDate($('styled-date'));
 const updateFlip = createFlipClock($('flip-clock'));
 const updateOrbitFlip=createFlipClock($('orbit-flip'));
@@ -169,6 +171,12 @@ createClockTv({snapshot(includeLocation=false){
  if(!isReceiver)return;
  receiverLocation=snapshot.coordinates;
  const root=document.documentElement;root.lang=snapshot.language;
+ if(snapshot.language in clockText){
+  Object.assign(t,getDictionary(snapshot.language),clockText[snapshot.language as keyof typeof clockText]);
+  if($('wake-status').textContent)$('wake-status').textContent=t.unavailable;
+  $('analog-clock').setAttribute('aria-label',t.analog);
+  $('orbit-clock').setAttribute('aria-label',t.orbit);
+ }
  root.dataset.palette=snapshot.appearance.palette;root.dataset.style=snapshot.appearance.style;root.dataset.themeMode=snapshot.appearance.theme;root.dataset.theme=snapshot.appearance.theme;root.dataset.fontSize=snapshot.appearance.fontSize;
  for(const key of Object.keys(defaults))if(key!=='awake'&&key in snapshot.settings){Object.assign(settings,{[key]:snapshot.settings[key]});const input=field(key);if(input.type==='checkbox')(input as HTMLInputElement).checked=Boolean(snapshot.settings[key]);else{const value=String(snapshot.settings[key]);if(key==='zone'&&input instanceof HTMLSelectElement&&![...input.options].some(option=>option.value===value))input.add(new Option(value,value));input.value=value;}}
  settings.awake=!(window.parent!==window&&new URLSearchParams(location.search).get('preview')==='1');configure();focus(true);

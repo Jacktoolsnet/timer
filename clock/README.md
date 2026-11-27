@@ -96,3 +96,9 @@ aktuellen Origin; fremde QR-Links werden nicht geöffnet. Nur beim Öffnen eines
 Voraussetzung; die manuelle Codeeingabe bleibt als Alternative verfügbar.
 
 Für Bildgröße und senderseitiges Beenden zuerst das aktualisierte Backend, dann Clock deployen (keine neue Datenbankmigration nötig). Alte Snapshots ohne Bildgröße verwenden 100 %.
+
+### Empfänger nach Browser-Neustart
+
+Nach einer bestätigten Verbindung merkt sich der Empfänger ausschließlich die letzte Darstellung (Uhrart, Farben, Hintergrund, Sprache, Zeitzone, Kalender und Bildgröße) lokal im Browser. Beim erneuten Öffnen von `/stream/` oder einer lokalisierten Stream-Seite wird diese Uhr ohne Backend-Anfrage wiederhergestellt und läuft mit aktueller Gerätezeit weiter. Vorschläge vor der Empfängerbestätigung und Vorschau-Iframes speichern nichts.
+
+Der Stop-/Trennen-Button entfernt die gemerkte Darstellung und öffnet wieder die Kopplung mit QR-Code. Danach bleibt auch beim Neuladen die QR-Ansicht. Kopplungsschlüssel, Codes, Senderbezeichnung und Standortkoordinaten werden nicht gespeichert; es wird keine frühere Steuerverbindung automatisch reaktiviert. Für neue Fernsteuerung oder die standortbasierte Sonnenuhr zuerst trennen und neu koppeln. Allgemeines Löschen der gespeicherten Einstellungen entfernt auch die gemerkte Empfängeranzeige. Falls Browserspeicherung blockiert/gelöscht ist (z. B. privater Modus), ist keine Wiederherstellung möglich. Vollbild und Wachhalten bleiben von den Browserberechtigungen abhängig.

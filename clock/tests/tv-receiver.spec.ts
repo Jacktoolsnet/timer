@@ -291,7 +291,7 @@ test('failed approval clears the spinner and restores usable focused approval bu
   const path=new URL(route.request().url()).pathname;
   if(path.endsWith('/receivers/'))return route.fulfill({json:{id:'loading-failed',receiverToken:'a'.repeat(64),pairToken:'b'.repeat(64),code:'12345678',pairSeconds:600}});
   if(path.endsWith('/approve/'))return route.fulfill({status:503,json:{error:'unavailable'}});
-  return route.fulfill({json:{state:'pending',revision:1,acknowledged:0,snapshot}});
+  return route.fulfill({json:{state:'pending',revision:1,acknowledged:0,snapshot:{...snapshot,language:'en'}}});
  });
  await page.goto('/en/stream/');await page.locator('#tv-approve').click();
  await expect(page.locator('#tv-loading')).toBeHidden();await expect(page.locator('#tv-receiver-panel')).toHaveAttribute('aria-busy','false');
