@@ -50,6 +50,7 @@ export function createClockTv(options:{snapshot:(includeLocation?:boolean)=>TvSn
  function schedule(delay=2000){window.clearTimeout(timer);if(session)timer=window.setTimeout(()=>void poll(),delay);}
  function forget(){refreshCountdown=undefined;window.clearInterval(validityTimer);window.clearTimeout(timer);session=undefined;revision=0;lastSent='';}
  function clearPreview(){
+  receiverApproval?.reset();
   pendingSnapshot=undefined;lastPreview='';
   const frame=document.getElementById('tv-preview') as HTMLIFrameElement|null;
   frame?.removeAttribute('src');frame?.removeAttribute('data-loaded');
@@ -87,7 +88,7 @@ export function createClockTv(options:{snapshot:(includeLocation?:boolean)=>TvSn
      const frame=$('tv-preview') as HTMLIFrameElement;
      if(!frame.hasAttribute('src'))frame.src='/'+document.documentElement.lang+'/stream/?preview=1';
      sendPreview();status('');
-     if(first)receiverApproval?.focusDefault();
+     if(first)receiverApproval?.focusDefault();else receiverApproval?.ensureFocus();
     }else if((state.state==='active'||state.state==='detached')&&state.snapshot){
      if(revision<state.revision){refreshCountdown=undefined;window.clearInterval(validityTimer);clearPreview();options.apply(state.snapshot);running=true;showReceiver(true);revision=state.revision;}
      if(state.state==='active'&&state.acknowledged!==state.revision)await api(session.id+'/ack','POST',{revision:state.revision});

@@ -167,7 +167,8 @@ test('receiver remote navigation survives delayed preview loading and preserves 
  await page.locator('#tv-preview').evaluate((frame:HTMLIFrameElement)=>{
   frame.parentElement!.inert=false;frame.focus();
  });
- await expect(approve).toBeFocused();
+ await expect(reject).toBeFocused();
+ await page.keyboard.press('ArrowRight');await expect(approve).toBeFocused();
  await page.keyboard.press('Enter');
  await expect.poll(()=>approved).toBe(1);
  await expect(page.locator('body')).toHaveClass(/tv-ready/);
@@ -208,4 +209,43 @@ test('receiver retry takes focus when a pending pairing session expires',async({
  await expect(page.locator('#tv-retry')).toBeFocused();
  await expect(page.locator('#tv-approve')).toBeHidden();
  await expect(page.locator('#tv-reject')).toBeHidden();
+});
+
+for(const remoteKey of ['Enter','Select'])test('receiver recovers ignored focus and accepts remote key without DOM focus ('+remoteKey+')',async({page})=>{
+ let approved=0;
+ await page.addInitScript(()=>{
+  const original=HTMLElement.prototype.focus;
+  let focusAllowedAt=0;
+  (window as any).ignoredApprovalFocus=0;
+  HTMLElement.prototype.focus=function(options?:FocusOptions){
+   if(this.id==='tv-approve'){
+    if(!focusAllowedAt)focusAllowedAt=Date.now()+700;
+    if(Date.now()<focusAllowedAt){(window as any).ignoredApprovalFocus++;return;}
+   }
+   original.call(this,options);
+  };
+  Element.prototype.requestFullscreen=()=>Promise.reject(new Error('No fullscreen in focus test'));
+ });
+ await page.route('**/api/v1/tv/**',route=>{
+  const path=new URL(route.request().url()).pathname;
+  if(path.endsWith('/receivers/'))return route.fulfill({json:{id:'slow-focus',receiverToken:'a'.repeat(64),pairToken:'b'.repeat(64),code:'12345678',pairSeconds:600}});
+  if(path.endsWith('/approve/')){approved++;return route.fulfill({status:204});}
+  if(path.endsWith('/ack/'))return route.fulfill({status:204});
+  return route.fulfill({json:{state:approved?'active':'pending',revision:1,acknowledged:1,snapshot}});
+ });
+ await page.goto('/en/stream/');
+ const approve=page.locator('#tv-approve'),reject=page.locator('#tv-reject');
+ await expect(approve).toBeFocused();
+ expect(await page.evaluate(()=>(window as any).ignoredApprovalFocus)).toBeGreaterThan(0);
+ expect(approved).toBe(0);
+ await page.keyboard.press('ArrowRight');await expect(reject).toBeFocused();
+ await reject.evaluate((button:HTMLButtonElement)=>button.blur());
+ await page.evaluate(()=>window.dispatchEvent(new Event('focus')));
+ await expect(reject).toBeFocused(); // Restore the selected action, not always Approve.
+ await page.keyboard.press('ArrowLeft');await expect(approve).toBeFocused();
+ await approve.evaluate((button:HTMLButtonElement)=>button.blur());
+ if(remoteKey==='Enter')await page.keyboard.press('Enter');
+ else await page.evaluate(()=>document.dispatchEvent(new KeyboardEvent('keydown',{key:'Select',bubbles:true,cancelable:true})));
+ await expect.poll(()=>approved).toBe(1);
+ await expect(page.locator('body')).toHaveClass(/tv-ready/);
 });
