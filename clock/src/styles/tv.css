@@ -48,7 +48,7 @@
 #tv-preview{position:absolute;left:0;top:0;width:960px;height:540px;border:0;transform:scale(var(--preview-scale));transform-origin:top left;pointer-events:none}
 #tv-sender-name{font-weight:600;color:var(--text);margin:16px 0 20px;overflow-wrap:anywhere}
 .tv-preview #clock-tv{display:none!important}
-#tv-approve:focus-visible,#tv-reject:focus-visible{outline:3px solid var(--accent);outline-offset:4px}
+#tv-approve:focus,#tv-reject:focus{outline:3px solid var(--accent);outline-offset:4px}
 
 
 /* Use the same shared button treatment as focus view, with receiver idle chrome. */

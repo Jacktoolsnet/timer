@@ -55,13 +55,17 @@ saved `view` values retain the legacy combined variants for compatibility;
 
 `/stream/` (Englisch) bzw. `/{lang}/stream/` zeigt den Empfänger mit QR-/Zahlencode.
 Im Header neben der Fokusansicht öffnet „Uhr streamen“ den Senderdialog. Am TV muss
-bestätigt werden. Die echte Uhrdarstellung wird wiederverwendet, kein separater
+bestätigt werden. Der Bestätigen-Button erhält automatisch Fokus. Alle vier
+Pfeiltasten wechseln zwischen Bestätigen und Ablehnen; Tab/Shift+Tab folgen der
+natürlichen Button-Reihenfolge, Enter/Leertaste aktivieren den gewählten Button.
+Die rein visuelle Vorschau ist inert; auch nach verzögertem Laden bleibt die
+gewählte Aktion fokussiert. Es gibt keine automatische Bestätigung.
+Die echte Uhrdarstellung wird wiederverwendet, kein separater
 Animationsnachbau. Weitere Änderungen werden übertragen; ohne Handy läuft die
 TV-Uhr selbständig mit der letzten Konfiguration weiter.
 
-Lokal Clock auf Port 4322 plus Backend auf 4340 starten. Die Datenbank benötigt
-`backend/migrations/002_tv.sql`; `npm --prefix backend run migrate:local` vom
-Repositoryroot aus anwenden. Danach ggf. den Backend-Devserver neu starten.
+Lokal Clock auf Port 4322 plus Backend auf 4340 starten. Die benötigten Tabellen werden beim Backendstart automatisch über die
+Migrationen angelegt.
 Für andere Ports `TV_ALLOWED_ORIGINS` am Backend anpassen. Browser-API-Anfragen
 laufen lokal über den Same-Origin-Vite-Proxy. Produktion nutzt direkt HTTPS auf
 `backend.jacktools.net`; `PUBLIC_BACKEND_URL` ist ein öffentlicher Buildwert,

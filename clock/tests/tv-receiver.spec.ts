@@ -43,7 +43,9 @@ test('receiver approval is compact, previews the real clock and rejection restor
  const frame=page.locator('#tv-preview'),box=await frame.boundingBox();
  expect(box!.width).toBeLessThan(620);expect(box!.height).toBeGreaterThan(100);
  await page.screenshot({path:'/tmp/jacktools-stream-approval-'+test.info().project.name+'.png'});
- await page.locator('#tv-reject').click();
+ await page.locator('#tv-approve').focus();
+ await page.keyboard.press('ArrowRight');await expect(page.locator('#tv-reject')).toBeFocused();
+ await page.keyboard.press('Enter');
  await expect(page.locator('#tv-code')).toHaveText('1234 5678');
  await expect(page.locator('#tv-qr')).toBeVisible();
  await expect(page.locator('#tv-validity')).toBeVisible();
@@ -121,4 +123,51 @@ test('pairing validity counts down, expires without displaying an old QR and res
  await expect(page.locator('#tv-countdown')).toHaveText('00:10');
  await expect(page.locator('#tv-validity-label')).toHaveText('Code gültig für');
  await expect(page.locator('#tv-qr')).toBeVisible();expect(created).toBe(2);
+});
+
+test('receiver remote navigation survives delayed preview loading and preserves the chosen button',async({page})=>{
+ let approved=0,polls=0,releasePreview!:()=>void;
+ const previewGate=new Promise<void>(resolve=>releasePreview=resolve);
+ await page.addInitScript(()=>{
+  Element.prototype.requestFullscreen=()=>Promise.reject(new Error('No fullscreen in navigation test'));
+ });
+ await page.route('**/stream/?preview=1',async route=>{await previewGate;await route.continue();});
+ await page.route('**/api/v1/tv/**',route=>{
+  const path=new URL(route.request().url()).pathname;
+  if(path.endsWith('/receivers/'))return route.fulfill({json:{id:'remote-test',receiverToken:'a'.repeat(64),pairToken:'b'.repeat(64),code:'12345678',pairSeconds:600}});
+  if(path.endsWith('/approve/')){approved++;return route.fulfill({status:204});}
+  if(path.endsWith('/ack/'))return route.fulfill({status:204});
+  polls++;
+  return route.fulfill({json:{state:approved?'active':'pending',revision:1,acknowledged:1,snapshot}});
+ });
+ await page.goto('/de/stream/');
+ const approve=page.locator('#tv-approve'),reject=page.locator('#tv-reject');
+ await expect(approve).toBeFocused();
+ // The preview is still loading: remote navigation must already work.
+ await page.keyboard.press('ArrowRight');await expect(reject).toBeFocused();
+ releasePreview();
+ await expect(page.frameLocator('#tv-preview').locator('.clock-display')).toHaveAttribute('data-view','orbit');
+ await expect(reject).toBeFocused();
+ await expect.poll(()=>polls).toBeGreaterThan(1);
+ await expect(reject).toBeFocused(); // Polling must not reset the user's selection.
+ await page.keyboard.press('Shift+Tab');await expect(approve).toBeFocused();
+ await page.keyboard.press('Tab');await expect(reject).toBeFocused();
+ for(const key of ['ArrowLeft','ArrowRight','ArrowUp','ArrowDown']){
+  await approve.focus();
+  await page.keyboard.press(key);await expect(reject).toBeFocused();
+  await page.keyboard.press(key);await expect(approve).toBeFocused();
+ }
+ expect(approved).toBe(0);
+ await expect(page.locator('.tv-clock-preview')).toHaveAttribute('inert','');
+ await reject.focus();
+ await page.locator('#tv-preview').evaluate((frame:HTMLIFrameElement)=>frame.focus());
+ await expect(reject).toBeFocused(); // A modern browser keeps the frame inert.
+ // Simulate a TV browser without inert support stealing focus on frame load.
+ await page.locator('#tv-preview').evaluate((frame:HTMLIFrameElement)=>{
+  frame.parentElement!.inert=false;frame.focus();
+ });
+ await expect(approve).toBeFocused();
+ await page.keyboard.press('Enter');
+ await expect.poll(()=>approved).toBe(1);
+ await expect(page.locator('body')).toHaveClass(/tv-ready/);
 });

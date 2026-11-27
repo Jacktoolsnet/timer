@@ -1,3 +1,4 @@
+import {createReceiverApproval} from './tv-approval-controls';
 import {createReceiverControls} from './tv-receiver-controls';
 import {createTvScanner} from './tv-scanner';
 import {createTvKeypad} from './tv-keypad';
@@ -30,6 +31,7 @@ export function createClockTv(options:{snapshot:(includeLocation?:boolean)=>TvSn
  }
 
  const receiverControls=receiver?createReceiverControls($('tv-controls')):undefined;
+ const receiverApproval=receiver?createReceiverApproval($('tv-receiver-panel'),$('tv-preview') as HTMLIFrameElement):undefined;
  const base=root.dataset.api!.replace(/\/$/,'');
  let session:{id:string;token:string}|undefined,revision=0,lastSent='',timer:number|undefined,busy=false,backoff=2000,running=false,qrSecret='';
  let pendingSnapshot:TvSnapshot|undefined,lastPreview='';
@@ -64,7 +66,7 @@ export function createClockTv(options:{snapshot:(includeLocation?:boolean)=>TvSn
   window.addEventListener('message',event=>{
    const frame=$('tv-preview') as HTMLIFrameElement;
    if(event.origin===location.origin&&event.source===frame.contentWindow&&event.data?.type==='clock-stream-preview-ready'){
-    frame.dataset.loaded='true';sendPreview();
+    frame.dataset.loaded='true';sendPreview();receiverApproval?.ensureFocus();
    }
   });
   const box=$('tv-preview').parentElement!;
@@ -85,7 +87,7 @@ export function createClockTv(options:{snapshot:(includeLocation?:boolean)=>TvSn
      const frame=$('tv-preview') as HTMLIFrameElement;
      if(!frame.hasAttribute('src'))frame.src='/'+document.documentElement.lang+'/stream/?preview=1';
      sendPreview();status('');
-     if(first) $('tv-approve').focus();
+     if(first)receiverApproval?.focusDefault();
     }else if((state.state==='active'||state.state==='detached')&&state.snapshot){
      if(revision<state.revision){refreshCountdown=undefined;window.clearInterval(validityTimer);clearPreview();options.apply(state.snapshot);running=true;showReceiver(true);revision=state.revision;}
      if(state.state==='active'&&state.acknowledged!==state.revision)await api(session.id+'/ack','POST',{revision:state.revision});

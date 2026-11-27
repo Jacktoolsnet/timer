@@ -12,7 +12,7 @@ const {lang,receiver=false}=Astro.props as {lang:Language;receiver?:boolean};con
   <span class="tv-icon tv-pairing-info" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="3"/><path d="M8 21h8m-4-4v4"/></svg></span>
   <h1 id="tv-title" class="tv-pairing-info">{t.title}</h1><p class="tv-pairing-info">{t.waiting}</p>
   <canvas id="tv-qr" aria-label="QR" role="img" hidden></canvas><output id="tv-code"></output>
-  <div id="tv-proposal" hidden><div class="tv-clock-preview"><iframe id="tv-preview" title={t.preview} tabindex="-1" allow="camera 'none'; microphone 'none'; geolocation 'none'; screen-wake-lock 'none'"></iframe></div><p id="tv-sender-name"></p></div>
+  <div id="tv-proposal" hidden><div class="tv-clock-preview" inert aria-hidden="true"><iframe id="tv-preview" title={t.preview} tabindex="-1" allow="camera 'none'; microphone 'none'; geolocation 'none'; screen-wake-lock 'none'"></iframe></div><p id="tv-sender-name"></p></div>
   <div class="tv-actions"><button id="tv-approve" class="primary" hidden>{t.approve}</button><button id="tv-reject" class="secondary" hidden>{t.reject}</button><button id="tv-retry" class="secondary" hidden>{t.retry}</button></div>
   <p id="tv-status" role="status" aria-live="polite"></p><div id="tv-validity" class="tv-validity tv-pairing-info" hidden><div><span id="tv-validity-label">{t.codeValidFor}</span><output id="tv-countdown" aria-live="off"></output></div><progress id="tv-validity-progress" max="600" value="600" aria-label={t.codeValidFor}></progress></div>
  </section>
