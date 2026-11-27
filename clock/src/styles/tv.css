@@ -104,3 +104,9 @@ body.tv-receiver.focus-view .clock-display {
 #tv-display-size{display:block;width:100%;min-height:44px;margin:10px 0 0;accent-color:var(--accent);cursor:pointer}
 #tv-display-size:focus-visible{outline:3px solid var(--accent);outline-offset:3px;border-radius:6px}
 #tv-dialog #tv-display-size-hint{margin:4px 0 0;font-size:.78rem;line-height:1.6}
+
+/* Keep the real-clock preview while approval and the first snapshot are loading. */
+.tv-loading{display:flex;align-items:center;justify-content:center;gap:12px;min-height:48px;margin:16px 0;color:var(--accent);font-size:.95rem;font-weight:600}
+.tv-loading-spinner{width:24px;height:24px;flex-shrink:0;border:3px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:tv-loading-spin .85s linear infinite}
+@keyframes tv-loading-spin{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.tv-loading-spinner{animation:none}}

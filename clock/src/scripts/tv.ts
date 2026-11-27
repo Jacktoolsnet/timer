@@ -47,7 +47,13 @@ export function createClockTv(options:{snapshot:(includeLocation?:boolean)=>TvSn
  const receiverApproval=receiver?createReceiverApproval($('tv-receiver-panel'),$('tv-preview') as HTMLIFrameElement):undefined;
  const base=root.dataset.api!.replace(/\/$/,'');
  let session:{id:string;token:string}|undefined,revision=0,lastSent='',timer:number|undefined,busy=false,backoff=2000,running=false,qrSecret='';
- let pendingSnapshot:TvSnapshot|undefined,lastPreview='';
+ let pendingSnapshot:TvSnapshot|undefined,lastPreview='',receiverLoading=false;
+ function setReceiverLoading(loading:boolean){
+  if(!receiver)return;receiverLoading=loading;
+  const panel=$('tv-receiver-panel');panel.setAttribute('aria-busy',String(loading));
+  $('tv-loading').hidden=!loading;
+  $('tv-approve').hidden=$('tv-reject').hidden=loading||panel.dataset.pending!=='true';
+ }
  let stopReceiver:()=>Promise<void>=async()=>{};
  const shareLocation=()=>!receiver&&($('tv-share-location') as HTMLInputElement).checked;
  let validityTimer:number|undefined,refreshCountdown:(()=>void)|undefined;
@@ -69,6 +75,7 @@ export function createClockTv(options:{snapshot:(includeLocation?:boolean)=>TvSn
   const frame=document.getElementById('tv-preview') as HTMLIFrameElement|null;
   frame?.removeAttribute('src');frame?.removeAttribute('data-loaded');
   document.getElementById('tv-receiver-panel')?.removeAttribute('data-pending');
+  setReceiverLoading(false);
  }
  function sendPreview(){
   const frame=document.getElementById('tv-preview') as HTMLIFrameElement|null;
@@ -96,7 +103,7 @@ export function createClockTv(options:{snapshot:(includeLocation?:boolean)=>TvSn
    if(receiver){
     if(state.state==='detached'&&!state.snapshot){await stopReceiver();return;}
     if(state.state==='pending'){
-     $('tv-proposal').hidden=false;$('tv-approve').hidden=false;$('tv-reject').hidden=false;$('tv-qr').hidden=true;$('tv-code').hidden=true;
+     $('tv-proposal').hidden=false;$('tv-approve').hidden=receiverLoading;$('tv-reject').hidden=receiverLoading;$('tv-qr').hidden=true;$('tv-code').hidden=true;
      const first=!pendingSnapshot;pendingSnapshot=state.snapshot;
      $('tv-receiver-panel').dataset.pending='true';
      $('tv-sender-name').textContent=state.snapshot?.senderName||t.unknownDevice;
@@ -133,7 +140,7 @@ export function createClockTv(options:{snapshot:(includeLocation?:boolean)=>TvSn
  }
  function showRetry(){$('tv-retry').hidden=false;focusRetry();}
  function setSenderConnected(connected:boolean){if(connected)scanner?.close();$('tv-pair-form').hidden=connected;$('tv-pair-hint').hidden=connected;$('tv-size-controls').hidden=!connected;$('tv-detach').hidden=!connected;if(!connected){qrSecret='';const input=$('tv-pair-code') as HTMLInputElement;input.required=true;input.parentElement!.hidden=false;$('tv-code-entry').hidden=false;keypad?.sync();}}
- async function action(button:HTMLButtonElement,work:()=>Promise<void>){if(busy)return;busy=true;button.disabled=true;try{await work();}catch(error){if(error instanceof TvError&&error.code==='invalid_pairing'&&!receiver)setSenderConnected(false);status(error instanceof TvError&&error.code==='invalid_pairing'?t.invalid:t.failed);}finally{busy=false;button.disabled=false;focusRetry();keypad?.sync();schedule();}}
+ async function action(button:HTMLButtonElement,work:()=>Promise<void>){if(busy)return;busy=true;button.disabled=true;try{await work();}catch(error){if(error instanceof TvError&&error.code==='invalid_pairing'&&!receiver)setSenderConnected(false);status(error instanceof TvError&&error.code==='invalid_pairing'?t.invalid:t.failed);}finally{busy=false;button.disabled=false;if(receiver&&button.id==='tv-approve'&&!receiverLoading)receiverApproval?.focusDefault();focusRetry();keypad?.sync();schedule();}}
  if(receiver){
   function startCountdown(seconds:number,requestedAt:number){
    const duration=Number.isFinite(seconds)&&seconds>0?Math.min(seconds,600):600;
@@ -166,8 +173,11 @@ export function createClockTv(options:{snapshot:(includeLocation?:boolean)=>TvSn
    }catch{status(t.failed);$('tv-code').textContent='';showRetry();}
   }
   $('tv-approve').addEventListener('click',event=>void action(event.currentTarget as HTMLButtonElement,async()=>{
-   receiverControls?.requestFullscreen();
-   await api(session!.id+'/approve','POST',{});refreshCountdown=undefined;window.clearInterval(validityTimer);schedule(10);
+   setReceiverLoading(true);
+   try{
+    receiverControls?.requestFullscreen();
+    await api(session!.id+'/approve','POST',{});refreshCountdown=undefined;window.clearInterval(validityTimer);schedule(10);
+   }catch(error){setReceiverLoading(false);throw error;}
   }));
   async function stop(){
    if(session)await api(session.id+'/stop','POST',{});

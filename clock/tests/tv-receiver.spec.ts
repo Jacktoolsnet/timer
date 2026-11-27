@@ -249,3 +249,53 @@ for(const remoteKey of ['Enter','Select'])test('receiver recovers ignored focus 
  await expect.poll(()=>approved).toBe(1);
  await expect(page.locator('body')).toHaveClass(/tv-ready/);
 });
+
+test('approval immediately replaces buttons with loading feedback until the real clock is ready',async({page})=>{
+ let releaseApproval!:()=>void,active=false;
+ const approvalGate=new Promise<void>(resolve=>{releaseApproval=resolve;});
+ await page.addInitScript(()=>{
+  Element.prototype.requestFullscreen=()=>{
+   (window as any).loadingBeforeFullscreen=!document.getElementById('tv-loading')!.hidden&&document.getElementById('tv-approve')!.hidden&&document.getElementById('tv-reject')!.hidden;
+   return Promise.resolve();
+  };
+ });
+ await page.route('**/api/v1/tv/**',async route=>{
+  const path=new URL(route.request().url()).pathname;
+  if(path.endsWith('/receivers/'))return route.fulfill({json:{id:'loading',receiverToken:'a'.repeat(64),pairToken:'b'.repeat(64),code:'12345678',pairSeconds:600}});
+  if(path.endsWith('/approve/')){await approvalGate;return route.fulfill({status:204});}
+  if(path.endsWith('/ack/'))return route.fulfill({status:204});
+  return route.fulfill({json:{state:active?'active':'pending',revision:1,acknowledged:1,snapshot}});
+ });
+ await page.goto('/de/stream/');
+ await expect(page.frameLocator('#tv-preview').locator('.clock-display')).toHaveAttribute('data-view','orbit');
+ await page.locator('#tv-approve').click();
+ await expect(page.locator('#tv-loading')).toBeVisible();
+ await expect(page.locator('#tv-loading')).toHaveText('Deine Uhr wird geladen …');
+ await expect(page.locator('#tv-receiver-panel')).toHaveAttribute('aria-busy','true');
+ await expect(page.locator('#tv-approve')).toBeHidden();await expect(page.locator('#tv-reject')).toBeHidden();
+ await expect(page.locator('#tv-preview')).toBeVisible();
+ expect(await page.evaluate(()=>(window as any).loadingBeforeFullscreen)).toBe(true);
+ releaseApproval();
+ // A pending poll after successful approval must not bring back the action buttons.
+ await expect.poll(()=>page.evaluate(()=>document.getElementById('tv-approve')?.hasAttribute('disabled'))).toBe(false);
+ await page.waitForTimeout(2200);
+ await expect(page.locator('#tv-loading')).toBeVisible();await expect(page.locator('#tv-reject')).toBeHidden();
+ active=true;
+ await expect(page.locator('body')).toHaveClass(/tv-ready/);
+ await expect(page.locator('#tv-loading')).toBeHidden();await expect(page.locator('#tv-receiver-panel')).toBeHidden();
+ await expect(page.locator('.clock-display')).toHaveAttribute('data-view','orbit');
+});
+
+test('failed approval clears the spinner and restores usable focused approval buttons',async({page})=>{
+ await page.route('**/api/v1/tv/**',route=>{
+  const path=new URL(route.request().url()).pathname;
+  if(path.endsWith('/receivers/'))return route.fulfill({json:{id:'loading-failed',receiverToken:'a'.repeat(64),pairToken:'b'.repeat(64),code:'12345678',pairSeconds:600}});
+  if(path.endsWith('/approve/'))return route.fulfill({status:503,json:{error:'unavailable'}});
+  return route.fulfill({json:{state:'pending',revision:1,acknowledged:0,snapshot}});
+ });
+ await page.goto('/en/stream/');await page.locator('#tv-approve').click();
+ await expect(page.locator('#tv-loading')).toBeHidden();await expect(page.locator('#tv-receiver-panel')).toHaveAttribute('aria-busy','false');
+ await expect(page.locator('#tv-status')).toContainText('Connection unavailable');
+ await expect(page.locator('#tv-approve')).toBeEnabled();await expect(page.locator('#tv-approve')).toBeFocused();
+ await expect(page.locator('#tv-reject')).toBeVisible();await expect(page.locator('#tv-preview')).toBeVisible();
+});
