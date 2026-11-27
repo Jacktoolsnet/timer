@@ -43,9 +43,19 @@ for(const initiallyShared of [true,false])test('stream location is opt-in, works
  await receiver.locator('#tv-approve').click();
  await expect(receiver.locator('#sundial-view')).toHaveAttribute('data-location-state',initiallyShared?'ready':'missing');
  await expect(receiver.locator('#sundial-enable-location')).toBeHidden();
+ const missingHint=receiver.locator('#sundial-notice > #sundial-status');
+ if(!initiallyShared){
+  await expect(missingHint).toBeVisible();
+  await expect(missingHint).toHaveText('Bitte am Sender den Standort in den Einstellungen freigeben und „Standort mitsenden“ aktivieren.');
+  const fits=await missingHint.evaluate(el=>el.scrollHeight<=el.clientHeight&&el.getBoundingClientRect().bottom<=document.getElementById('sundial-notice-area')!.getBoundingClientRect().bottom+1);
+  expect(fits).toBe(true);
+ }
+
  await expect(page.locator('#tv-dialog')).toBeVisible();
  if(!initiallyShared)await share.check();
  await expect(receiver.locator('#sundial-shadow')).toHaveAttribute('visibility','visible',{timeout:15000});
+ await expect(missingHint).toHaveCount(0);
+ await expect(receiver.locator('#sundial-coordinates #sundial-status')).toBeVisible();
  await expect(receiver.locator('#seasonal-background')).toHaveAttribute('data-location-based','true');
  // Position updates are propagated only while explicit sharing remains enabled.
  await context.setGeolocation({latitude:-33.9249,longitude:18.4241});
@@ -55,6 +65,8 @@ for(const initiallyShared of [true,false])test('stream location is opt-in, works
  await expect.poll(()=>snapshot?.coordinates,{timeout:15000}).toBeUndefined();
  await expect(receiver.locator('#sundial-view')).toHaveAttribute('data-location-state','missing');
  await expect(receiver.locator('#sundial-shadow')).toHaveAttribute('visibility','hidden');
+ await expect(missingHint).toBeVisible();
+ await expect(missingHint).toContainText('Standort in den Einstellungen freigeben');
  await expect(receiver.locator('#seasonal-background')).toHaveAttribute('data-location-based','false');
  expect(await page.evaluate(()=>JSON.stringify(localStorage))).not.toMatch(/latitude|longitude|51\.5|33\.925/);
  expect(await receiver.evaluate(()=>JSON.stringify(localStorage))).not.toMatch(/latitude|longitude|51\.5|33\.925/);

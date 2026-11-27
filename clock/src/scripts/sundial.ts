@@ -6,6 +6,8 @@ import type { SeasonalLocation } from '../lib/seasonal-location';
 export function createSundial(){
  const root=document.getElementById('sundial-view')!;
  const status=document.getElementById('sundial-status')!;
+ const isReceiver=document.getElementById('clock-app')?.dataset.receiver==='true';
+ const notice=document.getElementById('sundial-notice')!;
  const shadow=document.getElementById('sundial-shadow')!;
  const sun=document.getElementById('sundial-sun')!;
  const time=document.getElementById('sundial-time')!;
@@ -114,8 +116,13 @@ export function createSundial(){
   infoArea.setAttribute('visibility',location?'visible':'hidden');
   coordinateArea.setAttribute('visibility',location?'visible':'hidden');
   if(location){if(status.parentElement!==coordinateContainer)coordinateContainer.append(status);}
-  else if(status.parentElement!==enableLocation)enableLocation.append(status);
-  enableLocation.hidden=!!location||document.getElementById('clock-app')?.dataset.receiver==='true';
+  else{
+   // The receiver cannot request the sender's location. Keep its explanation
+   // outside the intentionally hidden location button.
+   const target=isReceiver?notice:enableLocation;
+   if(status.parentElement!==target)target.prepend(status);
+  }
+  enableLocation.hidden=!!location||isReceiver;
   enableLocation.disabled=pending;
   enableLocation.setAttribute('aria-busy',String(pending));
   if(!location){nightHint.hidden=true;sun.style.display='none';sun.setAttribute('visibility','hidden');shadow.setAttribute('visibility','hidden');time.textContent='';status.textContent=pending?text.pending:message||text.missing;return;}

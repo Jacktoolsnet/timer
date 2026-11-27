@@ -110,3 +110,13 @@ body.tv-receiver.focus-view .clock-display {
 .tv-loading-spinner{width:24px;height:24px;flex-shrink:0;border:3px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:tv-loading-spin .85s linear infinite}
 @keyframes tv-loading-spin{to{transform:rotate(360deg)}}
 @media(prefers-reduced-motion:reduce){.tv-loading-spinner{animation:none}}
+
+
+/* An actionable sender instruction, not a dead location button on the TV. */
+.tv-receiver #sundial-notice > #sundial-status {
+ width:100%; max-height:68px; box-sizing:border-box;
+ padding:7px 9px; font:600 11px/1.35 system-ui;
+ color:var(--sundial-ink); background:var(--sundial-paper);
+ border:1px solid var(--accent); border-radius:8px;
+ overflow-wrap:anywhere;
+}
