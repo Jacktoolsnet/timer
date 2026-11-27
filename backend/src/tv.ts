@@ -57,6 +57,8 @@ export function tvRouter(config:Config,db:Database){
  });
  router.post('/:id/ack',async(req,res)=>{const body=object(req.body,['revision']);await db.transaction(async client=>{const row=await authorized(client,id(req),req.get('Authorization'),'receiver');if(row.state!=='active'||body.revision!==row.revision)throw new ApiError(409,'tv_conflict');await client.query('UPDATE jt_tv_sessions SET acknowledged=$2 WHERE id=$1',[row.id,row.revision]);});res.status(204).end();});
  router.post('/:id/detach',async(req,res)=>{object(req.body,[]);await db.transaction(async client=>{const row=await authorized(client,id(req),req.get('Authorization'),'sender');if(row.state==='pending')await client.query('DELETE FROM jt_tv_sessions WHERE id=$1',[row.id]);else await client.query("UPDATE jt_tv_sessions SET state='detached',sender_hash=NULL,code_hash=NULL,qr_hash=NULL WHERE id=$1",[row.id]);});res.status(204).end();});
+ // A detached session without a snapshot is an explicit sender stop, not a lost connection.
+ router.post('/:id/end',async(req,res)=>{object(req.body,[]);await db.transaction(async client=>{const row=await authorized(client,id(req),req.get('Authorization'),'sender');await client.query("UPDATE jt_tv_sessions SET state='detached',snapshot=NULL,sender_hash=NULL,code_hash=NULL,qr_hash=NULL WHERE id=$1",[row.id]);});res.status(204).end();});
  router.post('/:id/stop',async(req,res)=>{object(req.body,[]);await db.transaction(async client=>{const row=await authorized(client,id(req),req.get('Authorization'),'receiver');await client.query('DELETE FROM jt_tv_sessions WHERE id=$1',[row.id]);});res.status(204).end();});
  return router;
 }

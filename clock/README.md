@@ -77,18 +77,16 @@ keine Servergeheimnisse in diese Variable eintragen. Der Produktionsbuild lehnt
 HTTP-API-Adressen ab. Lokale Overrides gehören
 in `.env.development.local`, nicht in die Produktionsbuild-Umgebung.
 
-Kein Standort, Wecker, Audio oder persönliche Alarmkonfiguration im Snapshot.
+Standort nur nach zusätzlicher Freigabe; keine Wecker, kein Audio und keine persönliche Alarmkonfiguration im Snapshot.
 QR-Links öffnen eine werbefreie, nicht indexierbare `/{lang}/pair/`-Seite und
 benötigen bewusstes Senden; Einstellungen dieses neuen Tabs vorher prüfen.
 Kopplungsdaten bleiben nur im Arbeitsspeicher. Neuladen erfordert erneute Kopplung.
-„Steuerung trennen“ lässt die Anzeige weiterlaufen; „Stream beenden“ am
-Empfänger widerruft die Verbindung und öffnet die Kopplung neu. Fullscreen und
+„Stream beenden“ am Sender oder Empfänger widerruft die Verbindung und öffnet die Kopplung am Empfänger neu. Bei einem bloßen Verbindungsverlust läuft die Uhr dagegen weiter. Fullscreen und
 Wachhalten sind abhängig vom Stickbrowser und müssen am echten Gerät getestet werden.
 Details, Produktions-ENV und Sicherheit: `../backend/README.md`, Abschnitt TV.
 
 Nach Eingabe aller acht Ziffern oder Erkennung im eingebauten Scanner wird die
-Kopplung automatisch angefragt. Bei Erfolg schließt das Overlay; Fehler bleiben
-sichtbar. Der Empfänger muss die Verbindung weiterhin bestätigen. „QR-Code scannen“ öffnet optional eine lokale Kameravorschau:
+Kopplung automatisch angefragt. Bei Erfolg bleibt das Overlay geöffnet und zeigt statt der Codeeingabe den Regler „Bildgröße“ (60–100 %). Uhr und Kalender werden live um die Mitte skaliert; der Hintergrund bleibt bildschirmfüllend. Auch die Stopptaste rückt vom Rand weg. Schließen und erneutes Öffnen unterbrechen die Verbindung nicht. Der Wert wird nur mit aktivierter Einstellungsspeicherung am Sender gemerkt; Kopplungsdaten und Koordinaten werden weiterhin nicht gespeichert. Fehler bleiben sichtbar. Der Empfänger muss die Verbindung weiterhin bestätigen. „QR-Code scannen“ öffnet optional eine lokale Kameravorschau:
 Kamerafreigabe nur beim Antippen, keine Audioanforderung, kein Bild-Upload und
 keine Aufzeichnung. QR-Erkennung über das lokal gebündelte `jsqr`, ohne externen
 Scandienst. Kamera stoppt bei Erkennung, Schließen, Escape, Seitenwechsel und
@@ -96,3 +94,5 @@ Hintergrundwechsel. Erkannt werden ausschließlich die eigenen Pairing-URLs der
 aktuellen Origin; fremde QR-Links werden nicht geöffnet. Nur beim Öffnen eines QR-Links in einem neuen Tab bleibt bewusstes
 „Stream starten“ nötig, damit dessen Einstellungen vorher geprüft werden können. HTTPS (oder localhost) und eine Kamera sind
 Voraussetzung; die manuelle Codeeingabe bleibt als Alternative verfügbar.
+
+Für Bildgröße und senderseitiges Beenden zuerst das aktualisierte Backend, dann Clock deployen (keine neue Datenbankmigration nötig). Alte Snapshots ohne Bildgröße verwenden 100 %.

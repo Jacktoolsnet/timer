@@ -212,6 +212,15 @@ test('TV pairing is receiver-approved, scoped, encrypted, revisioned, expiring a
  // A cancelled pending controller must never bypass receiver approval.
  const qr=await tvRequest('claim','POST',{pairToken:other.pairToken,snapshot:tvSnapshot});assert.equal(qr.status,200);const qrSender=await qr.json();
  await tvRequest(other.id+'/detach','POST',{},qrSender.senderToken);assert.equal((await tvRequest(other.id+'/receiver','GET',undefined,other.receiverToken)).status,401);
+ // Explicit sender-side stop removes the snapshot and leaves a receiver-only stop signal.
+ const ended=await create();const endSender=await (await tvRequest('claim','POST',{code:ended.code,snapshot:{...tvSnapshot,displayScale:80}})).json();
+ assert.equal((await tvRequest(ended.id+'/end','POST',{},receiver.receiverToken)).status,401);
+ assert.equal((await tvRequest(ended.id+'/approve','POST',{},ended.receiverToken)).status,204);
+ const scaled=await (await tvRequest(ended.id+'/receiver','GET',undefined,ended.receiverToken)).json();assert.equal(scaled.snapshot.displayScale,80);
+ assert.equal((await tvRequest(ended.id+'/end','POST',{},endSender.senderToken)).status,204);
+ const endSignal=await (await tvRequest(ended.id+'/receiver','GET',undefined,ended.receiverToken)).json();assert.equal(endSignal.state,'detached');assert.equal(endSignal.snapshot,undefined);
+ assert.equal((await tvRequest(ended.id+'/sender','GET',undefined,endSender.senderToken)).status,401);
+ assert.equal((await tvRequest(ended.id+'/stop','POST',{},ended.receiverToken)).status,204);
  const expired=await create();await db.query("UPDATE jt_tv_sessions SET pair_expires_at=now()-interval '1 second' WHERE id=$1",[expired.id]);
  assert.equal((await tvRequest('claim','POST',{code:expired.code,snapshot:tvSnapshot})).status,404);
  const active=await create();const activeSender=await (await tvRequest('claim','POST',{code:active.code,snapshot:tvSnapshot})).json();await tvRequest(active.id+'/approve','POST',{},active.receiverToken);

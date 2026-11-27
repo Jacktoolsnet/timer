@@ -86,3 +86,10 @@ test('optional stream coordinates are bounded, rounded and reject extra fields',
   assert.throws(()=>validateSnapshot({...tvSnapshot,coordinates}));
  }
 });
+
+
+test('stream image size is optional and accepts only integer percentages from 60 to 100',()=>{
+ assert.equal(validateSnapshot(tvSnapshot).displayScale,undefined);
+ for(const displayScale of [60,85,100])assert.equal(validateSnapshot({...tvSnapshot,displayScale}).displayScale,displayScale);
+ for(const displayScale of [null,'85',0,59,101,85.5,NaN,Infinity,{}])assert.throws(()=>validateSnapshot({...tvSnapshot,displayScale}));
+});

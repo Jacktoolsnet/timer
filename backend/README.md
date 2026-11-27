@@ -462,6 +462,7 @@ oder andere Tool-Subdomains. Admin-Cookies werden bei TV-Anfragen nicht gesendet
   Schreibzugriffe werden mit 409 abgewiesen. `POST .../ack` bestätigt die Anwendung.
 - `POST .../detach`: Sender widerruft seine Steuerung; eine laufende Anzeige bleibt.
   Ein noch unbestätigter Vorschlag wird dabei vollständig verworfen.
+- `POST .../end`: Sender beendet den Stream ausdrücklich, widerruft seine Steuerung und entfernt den Snapshot. Der Empfänger erhält `detached` ohne Snapshot, verlässt Vollbild und öffnet die Kopplung neu. Bei Verbindungsverlust läuft die Uhr unverändert weiter.
 - `POST .../stop`: nur Empfänger, löscht Sitzung und Snapshot. Oberfläche erzeugt
   danach einen neuen Kopplungscode für die nächste Verbindung.
 - Steuerverbindung maximal 24 Stunden; Ablauf wird bei **jedem** Zugriff geprüft.
@@ -626,3 +627,5 @@ npm run test:local prüft Berechtigungen, CSRF, Mehrprozess-Sperre, Zustandswech
 SMTP-Fehlerwiederholung und Entwarnung gegen eine wegwerfbare PostgreSQL-Datenbank.
 Die Tests senden **keine echten E-Mails**. SMTP-Daten und realer Empfang können erst
 nach Anlegen/Konfigurieren des eigenen Postfachs geprüft werden.
+
+Stream-Snapshots akzeptieren optional `displayScale` (ganze Prozentwerte von 60 bis 100). Ohne Feld gilt am Empfänger 100 %. Die Bildgröße skaliert nur Uhr/Kalender, nicht den Hintergrund. Für diese Erweiterung ist keine Datenbankmigration erforderlich; Backend vor Clock aktualisieren.

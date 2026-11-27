@@ -43,7 +43,7 @@ for(const initiallyShared of [true,false])test('stream location is opt-in, works
  await receiver.locator('#tv-approve').click();
  await expect(receiver.locator('#sundial-view')).toHaveAttribute('data-location-state',initiallyShared?'ready':'missing');
  await expect(receiver.locator('#sundial-enable-location')).toBeHidden();
- await page.locator('#tv-open').click();
+ await expect(page.locator('#tv-dialog')).toBeVisible();
  if(!initiallyShared)await share.check();
  await expect(receiver.locator('#sundial-shadow')).toHaveAttribute('visibility','visible',{timeout:15000});
  await expect(receiver.locator('#seasonal-background')).toHaveAttribute('data-location-based','true');

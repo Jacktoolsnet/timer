@@ -1,10 +1,11 @@
+import {storageAllowed} from '../lib/storage';
 import {createReceiverApproval} from './tv-approval-controls';
 import {createReceiverControls} from './tv-receiver-controls';
 import {createTvScanner} from './tv-scanner';
 import {createTvKeypad} from './tv-keypad';
 import QRCode from 'qrcode';
 import type {tvText} from '../lib/tv-text';
-export type TvSnapshot={version:1;settings:Record<string,string|number|boolean>;appearance:{palette:string;style:string;theme:string;fontSize:string};language:string;senderName?:string;coordinates?:{latitude:number;longitude:number}};
+export type TvSnapshot={version:1;settings:Record<string,string|number|boolean>;appearance:{palette:string;style:string;theme:string;fontSize:string};language:string;senderName?:string;displayScale?:number;coordinates?:{latitude:number;longitude:number}};
 type State={state:'waiting'|'pending'|'active'|'detached';revision:number;acknowledged:number;snapshot?:TvSnapshot};
 // Browsers do not expose a reliable device hostname. Send only a coarse, advisory label.
 export function senderDeviceName(){
@@ -16,6 +17,18 @@ export function senderDeviceName(){
 class TvError extends Error{constructor(public status:number,public code:string){super(code);}}
 export function createClockTv(options:{snapshot:(includeLocation?:boolean)=>TvSnapshot;apply:(snapshot:TvSnapshot)=>void}){
  const root=document.getElementById('clock-tv');if(!root)return;
+ const scaleKey='jacktools-clock-stream-size';
+ const validScale=(value:unknown)=>typeof value==='number'&&Number.isInteger(value)&&value>=60&&value<=100;
+ let displayScale=100;
+ if(root.dataset.receiver!=='true'&&storageAllowed())try{const saved=Number(localStorage.getItem(scaleKey));if(validScale(saved))displayScale=saved;}catch{/* Storage may be unavailable. */}
+ const streamSnapshot=(includeLocation=false):TvSnapshot=>({...options.snapshot(includeLocation),displayScale});
+ function apply(snapshot:TvSnapshot){
+  const scale=validScale(snapshot.displayScale)?snapshot.displayScale!:100;
+  document.body.style.setProperty('--tv-display-scale',String(scale/100));
+  document.body.style.setProperty('--tv-edge-inset-x',String((100-scale)/2)+'vw');
+  document.body.style.setProperty('--tv-edge-inset-y',String((100-scale)/2)+'vh');
+  options.apply(snapshot);
+ }
  const t=JSON.parse(root.dataset.text!) as typeof tvText.en,receiver=root.dataset.receiver==='true';
  const $=(id:string)=>document.getElementById(id)!;
  // Preview renders the same clock in an isolated frame, without pairing, location or wake lock.
@@ -24,7 +37,7 @@ export function createClockTv(options:{snapshot:(includeLocation?:boolean)=>TvSn
   window.addEventListener('message',event=>{
    if(event.source!==window.parent||event.origin!==location.origin||event.data?.type!=='clock-stream-preview')return;
    const snapshot=event.data.snapshot as TvSnapshot;
-   if(snapshot?.version===1&&snapshot.settings&&snapshot.appearance)options.apply(snapshot);
+   if(snapshot?.version===1&&snapshot.settings&&snapshot.appearance)apply(snapshot);
   });
   window.parent.postMessage({type:'clock-stream-preview-ready'},location.origin);
   return;
@@ -35,6 +48,7 @@ export function createClockTv(options:{snapshot:(includeLocation?:boolean)=>TvSn
  const base=root.dataset.api!.replace(/\/$/,'');
  let session:{id:string;token:string}|undefined,revision=0,lastSent='',timer:number|undefined,busy=false,backoff=2000,running=false,qrSecret='';
  let pendingSnapshot:TvSnapshot|undefined,lastPreview='';
+ let stopReceiver:()=>Promise<void>=async()=>{};
  const shareLocation=()=>!receiver&&($('tv-share-location') as HTMLInputElement).checked;
  let validityTimer:number|undefined,refreshCountdown:(()=>void)|undefined;
  let keypad:ReturnType<typeof createTvKeypad>|undefined;
@@ -80,6 +94,7 @@ export function createClockTv(options:{snapshot:(includeLocation?:boolean)=>TvSn
    const currentSession=session;
    const state=await api<State>(session.id+'/'+(receiver?'receiver':'sender'));if(session!==currentSession)return;backoff=2000;
    if(receiver){
+    if(state.state==='detached'&&!state.snapshot){await stopReceiver();return;}
     if(state.state==='pending'){
      $('tv-proposal').hidden=false;$('tv-approve').hidden=false;$('tv-reject').hidden=false;$('tv-qr').hidden=true;$('tv-code').hidden=true;
      const first=!pendingSnapshot;pendingSnapshot=state.snapshot;
@@ -90,7 +105,7 @@ export function createClockTv(options:{snapshot:(includeLocation?:boolean)=>TvSn
      sendPreview();status('');
      if(first)receiverApproval?.focusDefault();else receiverApproval?.ensureFocus();
     }else if((state.state==='active'||state.state==='detached')&&state.snapshot){
-     if(revision<state.revision){refreshCountdown=undefined;window.clearInterval(validityTimer);clearPreview();options.apply(state.snapshot);running=true;showReceiver(true);revision=state.revision;}
+     if(revision<state.revision){refreshCountdown=undefined;window.clearInterval(validityTimer);clearPreview();apply(state.snapshot);running=true;showReceiver(true);revision=state.revision;}
      if(state.state==='active'&&state.acknowledged!==state.revision)await api(session.id+'/ack','POST',{revision:state.revision});
      status('');
      if(state.state==='detached'){forget();status(t.expired);return;}
@@ -99,10 +114,10 @@ export function createClockTv(options:{snapshot:(includeLocation?:boolean)=>TvSn
     revision=state.revision;
     if(state.state==='active'){
      running=true;
-     const snapshot=options.snapshot(shareLocation()),serialized=JSON.stringify(snapshot);
+     const snapshot=streamSnapshot(shareLocation()),serialized=JSON.stringify(snapshot);
      if(serialized!==lastSent){const updated=await api<{revision:number}>(session.id+'/settings','PUT',{revision,snapshot});revision=updated.revision;lastSent=serialized;status(t.connected);}
      else status(state.acknowledged===revision?t.applied:t.connected);
-    }else status(t.pending);
+    }else if(state.state==='detached'){forget();setSenderConnected(false);status(t.expired);return;}else status(t.pending);
    }
    schedule(receiver||!running?2000:4000);
   }catch(error){
@@ -117,7 +132,7 @@ export function createClockTv(options:{snapshot:(includeLocation?:boolean)=>TvSn
   if(!button.hidden&&!button.disabled)button.focus();
  }
  function showRetry(){$('tv-retry').hidden=false;focusRetry();}
- function setSenderConnected(connected:boolean){if(connected)scanner?.close();$('tv-pair-form').hidden=connected;$('tv-detach').hidden=!connected;if(!connected){qrSecret='';const input=$('tv-pair-code') as HTMLInputElement;input.required=true;input.parentElement!.hidden=false;$('tv-code-entry').hidden=false;keypad?.sync();}}
+ function setSenderConnected(connected:boolean){if(connected)scanner?.close();$('tv-pair-form').hidden=connected;$('tv-pair-hint').hidden=connected;$('tv-size-controls').hidden=!connected;$('tv-detach').hidden=!connected;if(!connected){qrSecret='';const input=$('tv-pair-code') as HTMLInputElement;input.required=true;input.parentElement!.hidden=false;$('tv-code-entry').hidden=false;keypad?.sync();}}
  async function action(button:HTMLButtonElement,work:()=>Promise<void>){if(busy)return;busy=true;button.disabled=true;try{await work();}catch(error){if(error instanceof TvError&&error.code==='invalid_pairing'&&!receiver)setSenderConnected(false);status(error instanceof TvError&&error.code==='invalid_pairing'?t.invalid:t.failed);}finally{busy=false;button.disabled=false;focusRetry();keypad?.sync();schedule();}}
  if(receiver){
   function startCountdown(seconds:number,requestedAt:number){
@@ -160,6 +175,7 @@ export function createClockTv(options:{snapshot:(includeLocation?:boolean)=>TvSn
    if(document.fullscreenElement&&document.exitFullscreen)try{await document.exitFullscreen();}catch{/* The QR page remains usable if browser fullscreen cannot be closed. */}
    document.body.classList.remove('tv-ready');await start();
   }
+  stopReceiver=stop;
   $('tv-reject').addEventListener('click',event=>void action(event.currentTarget as HTMLButtonElement,stop));
   $('tv-stop').addEventListener('click',event=>void action(event.currentTarget as HTMLButtonElement,stop));
   $('tv-retry').addEventListener('click',event=>void action(event.currentTarget as HTMLButtonElement,async()=>{if(session)await api(session.id+'/stop','POST',{});await start();}));
@@ -167,6 +183,17 @@ export function createClockTv(options:{snapshot:(includeLocation?:boolean)=>TvSn
  }else{
   const dialog=$('tv-dialog') as HTMLDialogElement;
   let autoCode='';
+  const sizeInput=$('tv-display-size') as HTMLInputElement;
+  function syncSize(){sizeInput.value=String(displayScale);$('tv-display-size-value').textContent=displayScale+' %';sizeInput.setAttribute('aria-valuetext',displayScale+' %');}
+  syncSize();
+  function saveSize(){try{if(storageAllowed())localStorage.setItem(scaleKey,String(displayScale));else localStorage.removeItem(scaleKey);}catch{/* Live adjustment still works without storage. */}}
+  document.addEventListener('storage-enabled',saveSize);
+  document.addEventListener('preferences-cleared',saveSize);
+  sizeInput.addEventListener('input',()=>{
+   const value=Number(sizeInput.value);if(!validScale(value))return;displayScale=value;syncSize();
+   saveSize();
+   if(session)schedule(200);
+  });
   const locationChoice=$('tv-share-location') as HTMLInputElement;
   function syncLocationChoice(){
    const available=!!options.snapshot(true).coordinates;
@@ -183,12 +210,12 @@ export function createClockTv(options:{snapshot:(includeLocation?:boolean)=>TvSn
   });
   const fragment=new URLSearchParams(location.hash.slice(1));const secret=fragment.get('tv');
   if(secret){history.replaceState(null,'',location.pathname+location.search);if(/^[a-f0-9]{64}$/.test(secret)){qrSecret=secret;($('tv-pair-code') as HTMLInputElement).required=false;$('tv-code-entry').hidden=true;keypad.sync();dialog.showModal();}}
-  $('tv-open').addEventListener('click',()=>{syncLocationChoice();dialog.showModal();if(!session&&!qrSecret)($('tv-pair-code') as HTMLInputElement).focus();});$('tv-close').addEventListener('click',()=>dialog.close());
+  $('tv-open').addEventListener('click',()=>{syncLocationChoice();dialog.showModal();if(session)sizeInput.focus();else if(!qrSecret)($('tv-pair-code') as HTMLInputElement).focus();});$('tv-close').addEventListener('click',()=>dialog.close());
   $('tv-pair-form').addEventListener('submit',event=>{
    event.preventDefault();void action($('tv-send') as HTMLButtonElement,async()=>{
-    const snapshot=options.snapshot(shareLocation());
+    const snapshot=streamSnapshot(shareLocation());
     const created=await api<{id:string;senderToken:string;revision:number}>('claim','POST',{...(qrSecret?{pairToken:qrSecret}:{code:($('tv-pair-code') as HTMLInputElement).value.replace(/\s/g,'')}),snapshot},'');
-    qrSecret='';($('tv-pair-code') as HTMLInputElement).value='';session={id:created.id,token:created.senderToken};revision=created.revision;lastSent=JSON.stringify(snapshot);setSenderConnected(true);status(t.pending);dialog.close();$('tv-open').focus();
+    qrSecret='';($('tv-pair-code') as HTMLInputElement).value='';session={id:created.id,token:created.senderToken};revision=created.revision;lastSent=JSON.stringify(snapshot);setSenderConnected(true);status(t.pending);sizeInput.focus();
    });
   });
   $('tv-pair-code').addEventListener('input',()=>{
@@ -196,10 +223,10 @@ export function createClockTv(options:{snapshot:(includeLocation?:boolean)=>TvSn
    if(code.length<8){autoCode='';return;}
    if(/^\d{8}$/.test(code)&&code!==autoCode){autoCode=code;startPairing();}
   });
-  $('tv-detach').addEventListener('click',event=>void action(event.currentTarget as HTMLButtonElement,async()=>{await api(session!.id+'/detach','POST',{});forget();locationChoice.checked=false;syncLocationChoice();setSenderConnected(false);status(t.expired);}));
+  $('tv-detach').addEventListener('click',event=>void action(event.currentTarget as HTMLButtonElement,async()=>{await api(session!.id+'/end','POST',{});forget();locationChoice.checked=false;syncLocationChoice();setSenderConnected(false);status(t.ended);($('tv-pair-code') as HTMLInputElement).focus();}));
   const changed=()=>{if(session)schedule(600);};document.getElementById('clock-settings')!.addEventListener('change',changed);document.getElementById('clock-settings')!.addEventListener('input',changed);
   new MutationObserver(changed).observe(document.documentElement,{attributes:true,attributeFilter:['data-palette','data-style','data-font-size','data-theme']});
  }
- // Never persist capabilities, codes or snapshots. The receiver keeps rendering on network loss.
+ // Only the image-size preference may persist with consent, never capabilities, codes or snapshots. The receiver keeps rendering on network loss.
  window.addEventListener('pagehide',()=>{window.clearInterval(validityTimer);window.clearTimeout(timer);session=undefined;});
 }

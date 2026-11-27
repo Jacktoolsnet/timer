@@ -21,6 +21,7 @@ const {lang,receiver=false}=Astro.props as {lang:Language;receiver?:boolean};con
 
  <dialog id="tv-dialog" aria-labelledby="tv-title" aria-describedby="tv-pair-hint"><div class="dialog-inner"><h2 id="tv-title">{t.title}</h2><p id="tv-pair-hint"><span>{t.open}</span><a class="tv-receiver-url" href={import.meta.env.DEV?'/stream/':'https://clock.jacktools.net/stream/'} target="_blank" rel="noopener noreferrer"><span>clock.jacktools.net<strong>/stream</strong></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3h7v7m0-7L10 14M10 3H3v18h18v-7"/></svg></a><span>{t.enterCode}</span></p>
  <label class="tv-location-share toggle-row"><span class="tv-location-copy"><strong id="tv-share-location-label">{t.shareLocation}</strong><small id="tv-share-location-hint">{t.shareLocationHint}</small></span><input id="tv-share-location" type="checkbox" role="switch" aria-labelledby="tv-share-location-label" aria-describedby="tv-share-location-hint" /><span class="toggle" aria-hidden="true"></span></label>
+ <section id="tv-size-controls" class="tv-size-controls" hidden><div><label for="tv-display-size">{t.imageSize}</label><output id="tv-display-size-value" for="tv-display-size">100 %</output></div><input id="tv-display-size" type="range" min="60" max="100" step="1" value="100" aria-describedby="tv-display-size-hint" /><p id="tv-display-size-hint">{t.imageSizeHint}</p></section>
  <form id="tv-pair-form">
   <button id="tv-scan" class="secondary tv-scan-button" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5"/><rect x="7" y="7" width="10" height="10" rx="2"/><circle cx="12" cy="12" r="2"/></svg>{t.scan}</button>
   <div id="tv-code-entry"><label><span class="sr-only">{t.code}</span><input id="tv-pair-code" autofocus placeholder={t.code} inputmode="numeric" pattern="[0-9]{8}" maxlength="12" autocomplete="off" required /></label>
@@ -33,7 +34,7 @@ const {lang,receiver=false}=Astro.props as {lang:Language;receiver?:boolean};con
   </div>
   <button id="tv-send" class="primary" type="submit">{t.send}</button>
  </form>
- <p id="tv-status" role="status" aria-live="polite"></p><div class="dialog-actions"><button id="tv-detach" class="secondary" hidden>{t.detach}</button><button id="tv-close" class="secondary">{t.close}</button></div></div></dialog>
+ <p id="tv-status" role="status" aria-live="polite"></p><div class="dialog-actions"><button id="tv-detach" class="secondary" hidden>{t.stop}</button><button id="tv-close" class="secondary">{t.close}</button></div></div></dialog>
  <dialog id="tv-scanner-dialog" aria-labelledby="tv-scanner-title" aria-describedby="tv-scanner-status"><div class="dialog-inner"><h2 id="tv-scanner-title">{t.scanTitle}</h2><div class="tv-scanner-preview"><video id="tv-scanner-video" autoplay playsinline muted aria-label={t.scanHint}></video><span aria-hidden="true"></span></div><p id="tv-scanner-status" role="status" aria-live="polite"></p><div class="dialog-actions"><button id="tv-scanner-retry" type="button" class="secondary" hidden>{t.scan}</button><button id="tv-scanner-close" type="button" class="secondary" autofocus>{t.close}</button></div></div></dialog>
 </>}
 </div>

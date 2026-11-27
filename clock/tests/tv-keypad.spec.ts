@@ -21,8 +21,9 @@ test('stream dialog is compact and its keypad supports remote navigation, editin
  for(const key of '1234567')await page.locator(`[data-key="${key}"]`).click();await expect(input).toHaveValue('1234567');await expect(send).toBeDisabled();
  await page.getByRole('button',{name:'Letzte Ziffer löschen',exact:true}).click();await expect(input).toHaveValue('123456');
  await page.getByRole('button',{name:'Code komplett löschen',exact:true}).click();await expect(input).toHaveValue('');
- await input.fill('12a34 5678');await expect.poll(()=>submitted).toBe('12345678');await expect(page.locator('#tv-dialog')).not.toBeVisible();
- await expect(page.locator('#tv-open')).toBeFocused();
+ await input.fill('12a34 5678');await expect.poll(()=>submitted).toBe('12345678');await expect(page.locator('#tv-dialog')).toBeVisible();
+ await expect(page.locator('#tv-display-size')).toBeFocused();
+ await expect(page.locator('#tv-pair-hint')).toBeHidden();
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
 });
 

@@ -19,7 +19,7 @@ test('camera scanner decodes a real pairing QR locally, releases camera and star
  await page.route('**/api/v1/tv/**',route=>{if(route.request().url().endsWith('/claim/')){claim=route.request().postDataJSON();return route.fulfill({contentType:'application/json',body:JSON.stringify({id:'test',senderToken:'a'.repeat(64),revision:1})});}return route.fulfill({contentType:'application/json',body:JSON.stringify({state:'pending',revision:1,acknowledged:0})});});
  await page.goto('/de/');await page.locator('#tv-open').click();await expect(page.locator('#tv-send')).toHaveText('Stream starten');expect(await page.evaluate(()=>(window as any).__camera.calls)).toBe(0);
  await page.locator('#tv-scan').click();await expect.poll(()=>claim?.pairToken,{timeout:15000}).toBe(secret);
- await expect(page.locator('#tv-scanner-dialog')).not.toBeVisible();await expect(page.locator('#tv-code-entry')).toBeHidden();await expect(page.locator('#tv-dialog')).not.toBeVisible();
+ await expect(page.locator('#tv-scanner-dialog')).not.toBeVisible();await expect(page.locator('#tv-code-entry')).toBeHidden();await expect(page.locator('#tv-dialog')).toBeVisible();await expect(page.locator('#tv-display-size')).toBeFocused();
  expect(await page.evaluate(()=>(window as any).__camera.audio)).toBe(false);await expect.poll(()=>page.evaluate(()=>(window as any).__camera.stops)).toBeGreaterThan(0);
  expect(await page.locator('#tv-scanner-video').evaluate((video:HTMLVideoElement)=>video.srcObject)).toBeNull();
  await expect.poll(()=>claim?.pairToken).toBe(secret);

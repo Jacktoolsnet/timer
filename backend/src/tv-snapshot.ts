@@ -9,7 +9,7 @@ const enums={
 const booleans=['animateBackground','seconds','numbers','smooth'];
 const keys=[...Object.keys(enums),...booleans,'transparency','zone'];
 export function validateSnapshot(input:unknown){
- const body=object(input,['version','settings','appearance','language','senderName','coordinates']);if(body.version!==1)throw new ApiError(400,'invalid_snapshot');
+ const body=object(input,['version','settings','appearance','language','senderName','coordinates','displayScale']);if(body.version!==1)throw new ApiError(400,'invalid_snapshot');
  const settings=object(body.settings,keys);
  for(const [key,values] of Object.entries(enums))if(!values.includes(settings[key] as string))throw new ApiError(400,'invalid_snapshot');
  for(const key of booleans)if(typeof settings[key]!=='boolean')throw new ApiError(400,'invalid_snapshot');
@@ -19,11 +19,12 @@ export function validateSnapshot(input:unknown){
  const appearance=object(body.appearance,['palette','style','theme','fontSize']);
  if(!['terracotta','blue','green','orange','red','violet','teal','rose'].includes(appearance.palette as string)||!['warm','minimal','technical','soft'].includes(appearance.style as string)||!['light','dark'].includes(appearance.theme as string)||!['0','1','2','3'].includes(appearance.fontSize as string)||!['de','en','es','fr'].includes(body.language as string))throw new ApiError(400,'invalid_snapshot');
  if(body.senderName!==undefined&&(typeof body.senderName!=='string'||body.senderName.trim().length===0||body.senderName.length>80||/[\u0000-\u001f\u007f-\u009f\u202a-\u202e\u2066-\u2069]/u.test(body.senderName)))throw new ApiError(400,'invalid_snapshot');
+ if(body.displayScale!==undefined&&(!Number.isInteger(body.displayScale)||Number(body.displayScale)<60||Number(body.displayScale)>100))throw new ApiError(400,'invalid_snapshot');
  let coordinates:{latitude:number;longitude:number}|undefined;
  if(body.coordinates!==undefined){
   const value=object(body.coordinates,['latitude','longitude']);
   if(typeof value.latitude!=='number'||!Number.isFinite(value.latitude)||Math.abs(value.latitude)>90||typeof value.longitude!=='number'||!Number.isFinite(value.longitude)||Math.abs(value.longitude)>180)throw new ApiError(400,'invalid_snapshot');
   coordinates={latitude:Math.round(value.latitude*1000)/1000,longitude:Math.round(value.longitude*1000)/1000};
  }
- return {version:1,settings,appearance,language:body.language,...(coordinates?{coordinates}:{}),...(body.senderName===undefined?{}:{senderName:body.senderName})};
+ return {version:1,settings,appearance,language:body.language,...(body.displayScale===undefined?{}:{displayScale:body.displayScale as number}),...(coordinates?{coordinates}:{}),...(body.senderName===undefined?{}:{senderName:body.senderName})};
 }
