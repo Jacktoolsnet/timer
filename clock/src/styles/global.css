@@ -1342,6 +1342,8 @@ body.focus-view .clock-display[data-view=sundial] #sundial-status {
 .clock-display:is([data-view=binary],[data-view=binaryDigital],[data-view=binaryFlip]) :is(#analog-clock,#digital-clock) { display:none; }
 #binary-face { display:block; width:100%; height:auto; overflow:visible; }
 #binary-face text { fill:var(--muted); stroke:none; font:12px system-ui; text-anchor:middle; dominant-baseline:middle; }
+/* Align numeral ink, not the font’s x-height, with the dot-row centers. */
+#binary-face .binary-weights text { dominant-baseline:alphabetic; }
 #binary-face circle { fill:var(--accent); fill-opacity:.12; stroke:var(--accent); stroke-opacity:.3; stroke-width:1; transition:fill-opacity .15s,stroke-opacity .15s; }
 #binary-face circle[data-on=true] { fill-opacity:1; stroke-opacity:1; filter:drop-shadow(0 0 4px var(--accent)); }
 #binary-clock[data-seconds=false] [data-binary-seconds=true] { display:none; }

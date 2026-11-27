@@ -68,3 +68,22 @@ test('flip companion animates minute changes when seconds are disabled',async({p
  expect((await decoded(page)).slice(0,4)).toEqual([1,4,2,6]);
  await expect(page.locator('#binary-flip .flip-moving')).not.toHaveCount(0);
 });
+
+
+test('binary weight numerals are optically centered on their circle rows',async({page})=>{
+ await page.goto('/de/');await choose(page,'binary');
+ for(const focus of [false,true]){
+  await page.evaluate(focus=>document.body.classList.toggle('focus-view',focus),focus);
+  const offsets=await page.locator('.binary-weights text').evaluateAll(labels=>{
+   const ctx=document.createElement('canvas').getContext('2d')!;
+   return labels.map((label,row)=>{
+    const text=label as SVGTextElement;ctx.font=getComputedStyle(text).font;
+    const ink=ctx.measureText(text.textContent!);
+    const baseline=text.getStartPositionOfChar(0).y;
+    const dot=document.querySelectorAll<SVGCircleElement>('[data-binary-column="0"] circle')[row];
+    return Math.abs(baseline+(ink.actualBoundingBoxDescent-ink.actualBoundingBoxAscent)/2-dot.cy.baseVal.value);
+   });
+  });
+  for(const offset of offsets)expect(offset).toBeLessThan(1);
+ }
+});

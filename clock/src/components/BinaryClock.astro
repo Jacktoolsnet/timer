@@ -4,7 +4,7 @@ const {label}=Astro.props;
 ---
 <div id="binary-clock">
  <svg id="binary-face" viewBox="0 0 360 230" role="img" aria-label={label}>
-  <g class="binary-weights" aria-hidden="true">{[8,4,2,1].map((bit,row)=><text x="18" y={60+row*44}>{bit}</text>)}</g>
+  <g class="binary-weights" aria-hidden="true">{[8,4,2,1].map((bit,row)=><text x="18" y={60+row*44} dy=".35em">{bit}</text>)}</g>
   {[['HH',80],['MM',190],['SS',300]].map(([name,x],index)=><text class="binary-unit" x={x} y="20" data-binary-seconds={index===2?'true':undefined} aria-hidden="true">{name}</text>)}
   {[60,100,170,210,280,320].map((x,column)=><g data-binary-column={column} data-binary-seconds={column>=4?'true':undefined} aria-hidden="true">{[8,4,2,1].map((bit,row)=><circle cx={x} cy={60+row*44} r="12" data-bit={bit} data-on="false"/>)}</g>)}
  </svg>
