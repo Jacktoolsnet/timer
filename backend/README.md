@@ -206,6 +206,27 @@ Company-Browsertests: `cd company && npx playwright test tests/admin.spec.ts tes
 Der Proxytest prüft echte Browsercookies und Neuladen für `localhost` und `127.0.0.1`
 mit einem isolierten Test-HTTP-Backend, ohne Betreiberzugangsdaten.
 
+## Öffentliche Statusseite
+
+Die Backend-Startseite / zeigt eine kleine englische Statusübersicht im
+JackTools-Stil, mit automatischem Hell-/Dunkelmodus und Aktualisierung alle
+15 Sekunden. Sie prüft die Datenbank über SELECT 1 und zeigt ausschließlich:
+
+- Server is running
+- Database connection established bzw. Database temporarily unavailable
+
+Bei erreichbarer Datenbank antwortet sie mit HTTP 200, bei Datenbankfehlern mit
+HTTP 503. Keine Zugangsdaten, internen Hosts, Datenbanknamen oder rohen
+Fehlerdetails werden öffentlich angezeigt. Die Seite verwendet kein JavaScript,
+keine externen Ressourcen und keine Cookies; Antworten werden nicht gecacht
+und sind für Suchmaschinen ausgeschlossen.
+
+Die maschinenlesbaren Endpunkte /health/live und /health/ready bleiben unverändert.
+Kann die Anwendung überhaupt nicht starten (etwa wegen einer fehlerhaften
+Erstinstallation), kann sie auch keine Statusseite ausliefern: Dann zeigt Plesk
+seine Fehlerseite. Den Entwicklungs-/Debugmodus deshalb produktiv deaktivieren.
+Detaillierte Zertifikats- und Maildiagnosen bleiben im geschützten Adminbereich.
+
 ## API und Sicherheit
 
 - `GET /health/live`, `GET /health/ready`.
@@ -243,7 +264,7 @@ mit einem isolierten Test-HTTP-Backend, ohne Betreiberzugangsdaten.
    `ADMIN_ALLOWED_ORIGINS=https://jacktools.net` (gegebenenfalls zusätzlich die www-Origin).
 4. Das SQL-Verzeichnis migrations/ muss neben dist/ vorhanden sein.
    Beim Start werden ausstehende Migrationen automatisch installiert; kein CLI-Schritt nötig.
-5. Node-Einstieg `dist/server.js`; alternativ `npm start`. Serverport über HTTPS-Reverse-Proxy
+5. Node-Einstieg `server.cjs`; alternativ `npm start`. Serverport über HTTPS-Reverse-Proxy
    veröffentlichen. `TRUST_PROXY` passend zur tatsächlichen Proxykette setzen, nicht blind aktivieren.
 6. Company bauen und separat statisch deployen. Funktionierende Anmeldung und Cookies
    auf den echten HTTPS-Domains prüfen. Browser sieht keine Datenbank-Zugangsdaten.
@@ -280,8 +301,9 @@ npm run deploy:zip
 
 Das Paket liegt danach unter **backend/releases/jacktools-backend.zip**.
 Ein vorhandenes Paket wird erst nach erfolgreichem Build und Verpacken ersetzt.
-Der Vorgang prüft die Typen, bereinigt dist/, baut neu und verpackt ausschließlich
-dist/, migrations/, package.json, package-lock.json, README.md,
+Der Vorgang prüft die Typen, bereinigt die Buildausgaben (public bleibt erhalten),
+baut neu und verpackt ausschließlich
+dist/, public/, migrations/, server.cjs, package.json, package-lock.json, README.md,
 die **Vorlage** .env.example und eine kurze DEPLOY.txt.
 Keine echte .env, keine node_modules, Datenbankdaten oder Logs werden eingepackt.
 Die ZIP-Erstellung verwendet nur Node.js-Bordmittel; kein ZIP-Programm nötig.
@@ -296,10 +318,48 @@ npm ci --omit=dev
 npm start
 ~~~
 
-Bei einem Hoster mit eigener Prozessverwaltung stattdessen **dist/server.js**
+Bei einem Hoster mit eigener Prozessverwaltung stattdessen **server.cjs**
 als Startdatei einstellen und die App über das Panel neu starten. Der Datenbankaufbau erfolgt automatisch.
 Die lokale .env nicht hochladen und .env.example nicht unverändert produktiv verwenden.
 Vor Updates die Datenbank sichern. releases/ ist von Git ausgeschlossen.
+
+### Plesk/Passenger und ES-Module
+
+Als Startdatei server.cjs im Application Root verwenden, nicht direkt dist/server.js.
+Passenger lädt den Einstieg per require(). Da die eigentliche ES-Modul-Anwendung
+beim Start asynchron die Datenbank initialisiert, wird sie über einen dynamischen
+import() aus dem CommonJS-Starter geladen. Das vermeidet ERR_REQUIRE_ASYNC_MODULE.
+npm start verwendet ebenfalls diesen Einstiegspunkt.
+
+Öffentliche Debugseiten in Produktion deaktivieren: Passenger-Diagnosen können
+Umgebungsvariablen und damit Zugangsdaten offenlegen. Nach einer solchen Offenlegung
+Datenbank-/Root-/SMTP-Passwörter sowie Session- und Streaming-Schlüssel erneuern;
+weitere vom Hoster verwaltete Schlüssel durch den Hoster prüfen lassen.
+Schlüsselrotation beendet bestehende Sitzungen bzw. Streaming-Verbindungen.
+
+### Plesk: Application Root und Document Root
+
+Das ZIP in den Ordner /backend.jacktools.net entpacken, sodass dort package.json,
+package-lock.json, migrations/ und dist/ nebeneinander liegen.
+
+- **Application Root:** /backend.jacktools.net (Ordner mit package.json, nicht dist/)
+- **Document Root:** /backend.jacktools.net/public
+- **Application Startup File:** server.cjs
+- **Application Mode:** production
+
+public/ wird auch als leerer Ordner ins ZIP aufgenommen. Bereits vorhandene
+Dateien dort bleiben beim lokalen Packaging-Build erhalten und werden mit verpackt.
+Nur ausdrücklich öffentliche Dateien hineinlegen, niemals .env, Schlüssel oder
+Datenbankkopien. Versteckte Dateien und typische Schlüssel-/Dump-/Logdateien werden
+vom Packager abgewiesen. Dateien in dist/ sind ansonsten Buildausgaben und werden
+beim Packaging neu erzeugt. Öffentliche Dateien in public/ können dagegen regulär
+versioniert werden. Die leere Ordnerstruktur wird durch .gitkeep gesichert;
+diese Platzhalterdatei wird nicht ins ZIP aufgenommen.
+
+Die Abhängigkeiten über Plesk im Application Root installieren, dann App neu starten.
+Bei „Idle“ startet Plesk den Prozess laut Dashboard erst bei der nächsten Anfrage.
+Für verlässliche zeitgesteuerte Zertifikatschecks muss die App dauerhaft laufen
+oder der dokumentierte externe Cronjob des Hosters verwendet werden.
 
 ### Konkrete Domainkonfiguration
 

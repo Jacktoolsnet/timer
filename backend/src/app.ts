@@ -1,3 +1,4 @@
+import {statusPage} from './status-page.js';
 import {createCertificateMonitor,type CertificateMonitor} from './certificate-monitor.js';
 import {tvRouter} from './tv.js';
 import express,{type ErrorRequestHandler,type RequestHandler} from 'express';
@@ -36,6 +37,12 @@ export async function createApp(config:Config,db:Database,certificates:Certifica
  });
  app.use(express.json({limit:'16kb',strict:true}));
  app.use('/api/v1/tv',tvRouter(config,db));
+ app.get('/',async(_req,res)=>{
+  let connected=false;
+  try{await db.query('SELECT 1');connected=true;}catch{/* Public status never exposes raw database errors. */}
+  const page=statusPage(connected);
+  res.set('Content-Security-Policy',page.policy).status(connected?200:503).type('html').send(page.html);
+ });
  app.get('/health/live',(_req,res)=>res.json({status:'ok'}));
  app.get('/health/ready',async(_req,res)=>{try{await db.query('SELECT 1');}catch(error){if(error instanceof BusyError)throw error;throw new ApiError(503,'database_unavailable');}res.json({status:'ready'});});
  const audit=async(client:PoolClient,actor:string|null,target:string|null,action:string)=>{await client.query('INSERT INTO jt_audit_events(actor_id,target_id,action) VALUES($1,$2,$3)',[actor,target,action]);};

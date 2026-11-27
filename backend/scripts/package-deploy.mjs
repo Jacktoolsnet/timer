@@ -6,26 +6,34 @@ import {spawnSync} from 'node:child_process';
 import {crc32,deflateRawSync} from 'node:zlib';
 const root=fileURLToPath(new URL('../',import.meta.url));
 if(!process.env.npm_execpath)throw new Error('Use npm run deploy:zip.');
+// Public lives beside dist and is untouched by clean builds.
 await rm(join(root,'dist'),{recursive:true,force:true});
 const build=spawnSync(process.execPath,[process.env.npm_execpath,'run','build'],{cwd:root,stdio:'inherit'});
 if(build.error)throw build.error;
 if(build.status!==0)process.exit(build.status||1);
+await mkdir(join(root,'public'),{recursive:true});
 const files=[];
 async function collect(path){
  const info=await lstat(path);
  if(info.isSymbolicLink())throw new Error('Symbolic links are not allowed in deployment packages.');
  if(info.isDirectory()){
+  // ZIP needs explicit directory entries so an empty document root is extracted.
+  if(path===join(root,'public'))files.push({name:'public/',data:Buffer.alloc(0)});
   for(const child of (await readdir(path)).sort())await collect(join(path,child));
  }else if(info.isFile()){
   const name=relative(root,path).split(sep).join('/');
-  const allowed=/^dist\/[a-zA-Z0-9_/-]+\.js(?:\.map)?$/.test(name)||
+  if(name==='public/.gitkeep')return;
+  const publicAsset=name.startsWith('public/')&&
+   !name.split('/').some(part=>part.startsWith('.'))&&
+   !/\.(?:env|pem|key|p12|pfx|sql|log|zip)$/i.test(name);
+  const allowed=publicAsset||/^dist\/[a-zA-Z0-9_/-]+\.js(?:\.map)?$/.test(name)||
    /^migrations\/\d+_[a-z0-9_]+\.sql$/.test(name)||
-   ['package.json','package-lock.json','README.md','.env.example'].includes(name);
+   ['server.cjs','package.json','package-lock.json','README.md','.env.example'].includes(name);
   if(!allowed)throw new Error('Unexpected deployment file: '+name);
   files.push({name,data:await readFile(path)});
  }else throw new Error('Unsupported deployment file.');
 }
-for(const name of ['dist','migrations','package.json','package-lock.json','README.md','.env.example'])await collect(join(root,name));
+for(const name of ['dist','public','migrations','server.cjs','package.json','package-lock.json','README.md','.env.example'])await collect(join(root,name));
 if(!files.some(f=>f.name==='dist/server.js')||!files.some(f=>f.name==='dist/cli.js'))throw new Error('Missing production entry points.');
 files.push({name:'DEPLOY.txt',data:Buffer.from(
  'JackTools Backend - Node.js >=24.17.0\n\n'+
@@ -36,7 +44,9 @@ files.push({name:'DEPLOY.txt',data:Buffer.from(
  'Run on the server in this directory, with production environment variables:\n'+
  '  npm ci --omit=dev\n'+
  '  npm start\n\n'+
- 'Alternatively configure startup file dist/server.js in the hosting panel.\n'+
+ 'Plesk Application Root: directory containing package.json (not dist/).\n'+
+ 'Plesk Document Root: public; Startup File: server.cjs.\n'+
+ 'public/ is included even when empty. Only put public assets there, never credentials.\n'+
  'Startup applies pending migrations automatically. Packaging runs no database commands.\n'
 )});
 // Classic ZIP, standard DEFLATE + UTF-8, with only Node built-ins.

@@ -7,9 +7,11 @@ loadEnvironment();
 let db:Database|undefined,certificates:CertificateMonitor|undefined;
 try{
  const config=loadConfig(process.env);db=new Database(config);
+ console.log(JSON.stringify({event:'startup_phase',phase:'database_initialization'}));
  await initializeDatabase(db,config);
  console.log(JSON.stringify({event:'database_initialized'}));
  certificates=createCertificateMonitor(config.certificates,db);
+ console.log(JSON.stringify({event:'startup_phase',phase:'http_application'}));
  const app=await createApp(config,db,certificates);
  const server=app.listen(config.port,config.host,()=>console.log(JSON.stringify({event:'listening',host:config.host,port:config.port})));
  server.on('error',()=>{console.error('HTTP listener failed');void certificates?.close().finally(()=>db?.close()).finally(()=>process.exit(1));});
@@ -30,5 +32,7 @@ try{
 }catch(error){
  // Configuration errors contain variable names only, never supplied values/connection URLs.
  console.error(JSON.stringify({event:'startup_failed',message:databaseErrorHint(error)||(error instanceof Error&&/^(Invalid|Set |Run |Pending)/.test(error.message)?error.message:'Check database connection, schema and root configuration')}));
- await certificates?.close();await db?.close();process.exitCode=1;
+ await certificates?.close();await db?.close();
+ // Passenger keeps stdin open: exitCode alone leaves failed starts hanging.
+ process.exit(1);
 }
