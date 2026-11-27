@@ -59,7 +59,8 @@ bestätigt werden. Der Bestätigen-Button erhält automatisch Fokus. Alle vier
 Pfeiltasten wechseln zwischen Bestätigen und Ablehnen; Tab/Shift+Tab folgen der
 natürlichen Button-Reihenfolge, Enter/Leertaste aktivieren den gewählten Button.
 Die rein visuelle Vorschau ist inert; auch nach verzögertem Laden bleibt die
-gewählte Aktion fokussiert. Es gibt keine automatische Bestätigung.
+gewählte Aktion fokussiert. Auch „Try again“ erhält bei Ladefehlern oder abgelaufener Kopplung automatisch
+Fokus, einschließlich wiederholt fehlgeschlagener Versuche. Es gibt keine automatische Bestätigung.
 Die echte Uhrdarstellung wird wiederverwendet, kein separater
 Animationsnachbau. Weitere Änderungen werden übertragen; ohne Handy läuft die
 TV-Uhr selbständig mit der letzten Konfiguration weiter.
